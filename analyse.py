@@ -1,5 +1,6 @@
 import w3g
 from sets import Set
+import sys
 
 TIME_STEP = 1000            # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
@@ -211,7 +212,7 @@ ACTIONS_TO_SHOW_STRINGS += HERO_STRINGS
 class Ability:
   def __init__(self):
     self.name = ""
-    self.level = 0
+    self.level = 1
     self.used_recently_countdown = 0
 
   def __str__(self):
@@ -232,10 +233,10 @@ class Hero:
 
   def __str__(self):
     result = self.name + "(level "
-    result += str(self.level) + " "
+    result += str(self.level) + "/revives in "
     result += str(self.revive_time_left)
-    result += " "
-    result += list_to_str(self.abilities)
+    result += "/"
+    result += list_to_str(self.abilities,"/")
     result += ")"
     
     return result
@@ -377,7 +378,14 @@ def get_used_ability(ability_item):            # if the argument represents used
   
   return helper_list[1][:helper_list[1].index("(")].strip()
 
-replay_file = w3g.File('replay2.w3g')
+#==========================================================
+
+if len(sys.argv) != 2:
+  print("Expecting a filename argument.")
+  quit()
+
+replay_file = w3g.File(sys.argv[1])
+
 players = get_players(replay_file)
 
 last_update_time = -1 * TIME_STEP
