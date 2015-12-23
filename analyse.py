@@ -273,7 +273,6 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'Nalc'] : (0,0,0)      # goblin alchemist
   }
 
-
 class W3JSONEncoder(json.JSONEncoder):
   def default(self, o):
     return o.__dict__
@@ -467,8 +466,6 @@ for event in replay_file.events:
           new_hero.revive_time_left = HERO_REVIVE_TIMES[0]
         
         player.state.heroes.append(new_hero)
-    
-
         
   #  print(e.time)
   #  print(w3g.ITEMS.get(e.ability, e.ability))

@@ -1,0 +1,194 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title> w3 player </title>
+
+  <style>
+    body
+      {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+  
+    .player_div
+      {
+        border: 1px solid black;
+        margin: 10px;
+        width: 200px;
+        float: left;
+      }
+      
+    .orc_div
+      {
+        background-color: #BEE8C1;
+      }
+      
+    .human_div
+      {
+        background-color: #C2D4F2;
+      }
+      
+    .undead_div
+      {
+        background-color: #E1E4E8;
+      }
+      
+    .night_elf_div
+      {
+        background-color: #DDC9F2;
+      }
+      
+  </style>
+  
+  <script>
+    var file_lines;
+    var file_loaded = false;
+    var start_time = 0;
+    var current_file_line = 0;
+    var w3_player_div;
+    var w3_time_div;
+    var speedup = 4.0;
+  
+    window.onload = function()
+      {
+        w3_player_div = document.getElementById("w3_player");  
+        time_div = document.getElementById("time"); 
+      
+        var fileInput = document.getElementById('file_input');
+        
+        fileInput.addEventListener('change',
+          function(e)
+            {
+              var file = fileInput.files[0];
+              var textType = /text.*/;
+
+              if (file.type.match(textType))
+                {
+                  var reader = new FileReader();
+                  
+                  reader.onload = function(e)
+                    {
+                      file_lines = reader.result.split("\n");
+                      file_loaded = true;
+                    }
+
+                  reader.readAsText(file);
+                }
+            });
+        }
+        
+      function play()
+        {
+          if (!file_loaded)
+            {
+              alert("No file has been selected.")
+              return;
+            }
+            
+          start_time = Date.now()
+          window.setInterval(clock_tick,200);
+        }
+       
+       function time_to_string(time_ms)
+         {
+           seconds = Math.floor(time_ms / 1000);
+           minutes = Math.floor(seconds / 60);
+           seconds = seconds % 60;
+           return minutes.toString() + ":" + seconds.toString()
+         }
+        
+      function clock_tick()
+        {
+          var current_time = (Date.now() - start_time) * speedup;
+          var line = file_lines[current_file_line];
+          var colon_position = line.indexOf(":");
+          var line_time = parseInt(line.substring(0,colon_position));
+          
+          time_div.innerHTML = time_to_string(current_time);
+          
+          if (current_time >= line_time)
+            {
+              current_file_line++;
+              redraw_state(line.substring(colon_position + 1))
+            }
+         }
+         
+       function make_element(name, parent, class_name)
+         {
+           var new_element = document.createElement(name);
+           parent.appendChild(new_element);
+           new_element.className = class_name;
+           return new_element;
+         }
+         
+       function redraw_state(json_string)
+         {
+           while (w3_player_div.firstChild)    // clear child nodes
+             {
+               w3_player_div.removeChild(w3_player_div.firstChild);
+             }
+
+           parsed_data = JSON.parse(json_string)  
+           
+           w3_player_div.innerHTML = ""
+           
+           for(var player_id in parsed_data)
+             {
+               var player = parsed_data[player_id];
+               var player_div = make_element("div",w3_player_div,"player_div");
+               var player_span = make_element("span",player_div,"player_span");
+               player_span.innerHTML += player.name;
+               var race_image = make_element("img",player_span,"");
+               
+               if (player.race == "orc")
+                 {
+                   race_image.src = "resources/race_orc.png";
+                   player_div.className += " orc_div";
+                 }
+               else if (player.race == "human")
+                 {
+                   race_image.src = "resources/race_human.png";
+                   player_div.className += " human_div";
+                 }
+               else if (player.race == "undead")
+                 {
+                   race_image.src = "resources/race_undead.png";
+                   player_div.className += " undead_div";
+                 }
+               else
+                 {
+                   race_image.src = "resources/race_night_elf.png";
+                   player_div.className += " night_elf_div";
+                 }
+                 
+               var hero_ul = make_element("ul",player_div,"hero_ul");
+               
+               for (var i = 0; i < player.state.heroes.length; i++)
+                 {
+                   var hero_li = make_element("li",hero_ul,"");
+                   var hero_image = make_element("img",hero_li,"");
+                   hero_image.src = "resources/" + player.state.heroes[i].name + ".png"
+                 }
+               
+               var action_ul = make_element("ul",player_div,"action_ul");
+               
+               for (var i = 0; i < player.state.last_actions.length; i++)
+                 {
+                   var action_li = make_element("li",action_ul,"");
+                   action_li.innerHTML = player.state.last_actions[i];
+                 }
+             }
+            
+         }
+  
+  </script>
+</head>
+
+<body>
+  <input type="file" id="file_input"></input>
+  <input type="button" value=">" onclick="play()"></input>
+  <div id="time"></div>
+  <div id="w3_player"></div>
+</body>
+
+</html>

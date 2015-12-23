@@ -34,17 +34,17 @@ with open(sys.argv[1]) as input_file:
     
     for player_id in data:
       player = data[player_id]
+      print("")
       print(player["name"] + " (" + player["race"] + "):")
-      
       print("  heroes:")
       
       for hero in player["state"]["heroes"]:
         helper_string = "    "
         helper_string += hero["name"]
-        helper_string += " " + str(hero["level"])
+        helper_string += " " + str(max(1,hero["level"]))
         
         if hero["revive_time_left"] > 0:
-          helper_string += ", revives: " + str(hero["revive_time_left"])
+          helper_string += ", revives: " + time_to_string(hero["revive_time_left"])
           
         helper_string += ":"
         
