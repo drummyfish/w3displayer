@@ -2,7 +2,7 @@ import sys
 import time
 import json
 
-SPEEDUP = 5.0
+SPEEDUP = 1.0
 
 def time_to_string(time_in_ms):
   seconds = time_in_ms / 1000

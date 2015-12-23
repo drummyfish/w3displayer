@@ -10,32 +10,101 @@
         font-family: Arial, Helvetica, sans-serif;
       }
   
+    .action_ul
+      {
+        border-top: 1px solid black;
+      }
+  
+    .ability_level_span
+      {
+        color: red;
+        font-weight: bold;
+      }
+  
     .player_div
       {
         border: 1px solid black;
         margin: 10px;
-        width: 200px;
+        width: 180px;
+        height: 400px;
         float: left;
+        padding: 12px;
+        font-size: 15px;
+        border-radius: 3px;
       }
       
+    .player_span
+      {
+        font-size: 20px;
+      }
+    
+    .player_span img
+      {
+        position: relative;
+        top: 5px;
+      }
+    
     .orc_div
       {
         background-color: #BEE8C1;
+        border: 1px solid green;
       }
       
     .human_div
       {
         background-color: #C2D4F2;
+        border: 1px solid blue;
       }
       
     .undead_div
       {
         background-color: #E1E4E8;
+        border: 1px solid gray;
       }
       
     .night_elf_div
       {
         background-color: #DDC9F2;
+        border: 1px solid blue;
+      }
+      
+    .hero_ability_ul
+      {
+        font-size: 12px;
+        padding-left: 5px;
+      }
+      
+    .level_span
+      {
+        position: relative;
+        left: -27px;
+        bottom: 10px;
+        font-weight: bold;
+        font-family: "Lucida Console", Monaco, monospace;
+        font-size: 30px;
+        color: white;
+        -webkit-text-stroke: 1px black;
+      }
+      
+    .revive_span
+      {
+      }
+    
+    .recently_used
+      {
+        color: red;
+      }
+    
+    img
+      {
+        margin: 5px;
+      }
+    
+    ul
+      {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
       }
       
   </style>
@@ -47,7 +116,8 @@
     var current_file_line = 0;
     var w3_player_div;
     var w3_time_div;
-    var speedup = 4.0;
+    var speedup = 3.0;
+    var current_line_time = 0;
   
     window.onload = function()
       {
@@ -100,17 +170,23 @@
       function clock_tick()
         {
           var current_time = (Date.now() - start_time) * speedup;
-          var line = file_lines[current_file_line];
-          var colon_position = line.indexOf(":");
-          var line_time = parseInt(line.substring(0,colon_position));
+          var line;
+          var colon_position;
+          var redraw = false;
+          
+          while (current_line_time <= current_time)    // find the first line after the current time
+            {
+              line = file_lines[current_file_line];
+              colon_position = line.indexOf(":");
+              current_line_time = parseInt(line.substring(0,colon_position));
+              current_file_line++;
+              redraw = true;
+            }
           
           time_div.innerHTML = time_to_string(current_time);
           
-          if (current_time >= line_time)
-            {
-              current_file_line++;
-              redraw_state(line.substring(colon_position + 1))
-            }
+          if (redraw)
+            redraw_state(line.substring(colon_position + 1))
          }
          
        function make_element(name, parent, class_name)
@@ -165,9 +241,41 @@
                
                for (var i = 0; i < player.state.heroes.length; i++)
                  {
+                   var hero = player.state.heroes[i];
                    var hero_li = make_element("li",hero_ul,"");
                    var hero_image = make_element("img",hero_li,"");
-                   hero_image.src = "resources/" + player.state.heroes[i].name + ".png"
+                   hero_image.src = "resources/" + hero.name + ".png"
+                   
+                   var level_span = make_element("span",hero_li,"level_span");
+                   
+                   level = hero.level
+                   
+                   if (level == 0)
+                     level = 1;
+                   
+                   level_span.innerHTML = level;
+                   
+                   var revive_time = hero.revive_time_left;
+                   
+                   if (revive_time > 0)
+                     {
+                       var revive_span = make_element("span",hero_li,"revive_span");
+                       revive_span.innerHTML = time_to_string(revive_time);
+                     }
+                   
+                   var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
+                   
+                   for (var j = 0; j < hero.abilities.length; j++)
+                     {
+                       var ability_li = make_element("li",hero_ability_ul,"");
+                       ability_li.innerHTML = hero.abilities[j].name;
+                       
+                       if (hero.abilities[j].used_recently_countdown > 0)
+                         ability_li.className = "recently_used"
+                                        
+                       var ability_level_span = make_element("span",ability_li,"ability_level_span");
+                       ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
+                     }
                  }
                
                var action_ul = make_element("ul",player_div,"action_ul");
