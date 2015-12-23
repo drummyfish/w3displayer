@@ -1,6 +1,7 @@
 import w3g
 from sets import Set
 import sys
+import json
 
 TIME_STEP = 1000            # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
@@ -209,20 +210,15 @@ ACTIONS_TO_SHOW_STRINGS = [
 
 ACTIONS_TO_SHOW_STRINGS += HERO_STRINGS
 
+class W3JSONEncoder(json.JSONEncoder):
+  def default(self, o):
+    return o.__dict__
+
 class Ability:
   def __init__(self):
     self.name = ""
     self.level = 1
     self.used_recently_countdown = 0
-
-  def __str__(self):
-    result = self.name + "-"
-    result += str(self.level)
-    
-    if self.used_recently_countdown > 0:
-      result += "*"
-    
-    return result
 
 class Hero:
   def __init__(self):
@@ -230,16 +226,6 @@ class Hero:
     self.revive_time_left = -1
     self.level = 0        # hero level
     self.abilities = []   # will hold Ability objects
-
-  def __str__(self):
-    result = self.name + "(level "
-    result += str(self.level) + "/revives in "
-    result += str(self.revive_time_left)
-    result += "/"
-    result += list_to_str(self.abilities,"/")
-    result += ")"
-    
-    return result
   
   def train_ability(self, ability_name):    
     for ability in self.abilities:
@@ -262,16 +248,6 @@ class PlayerState:
     self.gold_spent = 0
     self.lumber_spent = 0
     self.last_actions = ["" for i in range(ACTIONS_SHOWN)]
-    
-  def __str__(self):
-    result = "gold spent:" + str(self.gold_spent) + ",lumber spent:" + str(self.lumber_spent)
-    
-    result += ";heroes:"
-    result += list_to_str(self.heroes)
-    result += ";last actions:"
-    result += list_to_str(self.last_actions)
-    
-    return result;
 
 class Player:
   def __init__(self):
@@ -391,22 +367,12 @@ players = get_players(replay_file)
 last_update_time = -1 * TIME_STEP
 last_event_time = 0
 
+encoder = W3JSONEncoder()
+
 for event in replay_file.events:
   while event.time > last_update_time:
     last_update_time += TIME_STEP
-    
-    update_string = str(last_update_time)
-    
-    for player_id in players:
-      update_string += "|" + str(players[player_id])
-      
-    print(update_string)
-  
-#  if type(event) is w3g.Ability:
-#    try:
-#      print(event)
-#    except Exception:
-#      print("error")
+    print(str(last_update_time) + ":" + encoder.encode(players))
 
   time_difference = event.time - last_event_time
   last_event_time = event.time
