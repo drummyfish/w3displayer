@@ -1,4 +1,4 @@
-# w3-real-time-replay-info
+# w3displayer
 
 This project implements simple tools to view real-time info about Warcraft III replays, as they are playing, which can be useful for game casters or just replay viewers.
 
