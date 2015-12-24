@@ -12,7 +12,8 @@
   
     .action_ul
       {
-        border-top: 1px solid black;
+        border-top: 1px solid grey;
+        margin: 10px 6px 0;
       }
   
     .ability_level_span
@@ -25,29 +26,31 @@
       {
         border: 1px solid black;
         margin: 10px;
-        width: 180px;
-        height: 400px;
+        width: 170px;
+        height: 500px;
         float: left;
         padding: 12px;
         font-size: 15px;
-        border-radius: 3px;
+        border-radius: 10px;
       }
       
     .player_span
       {
         font-size: 20px;
+        display: block;
+        margin-bottom: 10px;
       }
     
     .player_span img
       {
         position: relative;
-        top: 5px;
+        top: 10px;
       }
     
     .orc_div
       {
-        background-color: #BEE8C1;
-        border: 1px solid green;
+        background: linear-gradient(to right, #BDEB6E, #D6FCB6, #BDEB6E);
+        border: 3px double #807219;
       }
       
     .human_div
@@ -72,6 +75,12 @@
       {
         font-size: 12px;
         padding-left: 5px;
+        margin: 0 3px 5px;
+      }
+      
+    .hero_ul img
+      {
+        box-shadow: 2px 2px 5px #888888;
       }
       
     .level_span
@@ -297,6 +306,36 @@
   <input type="button" value=">" onclick="play()"></input>
   <div id="time"></div>
   <div id="w3_player"></div>
+  
+  <!-- for style testing: 
+  
+  <div class="player_div orc_div">
+    <span class="player_span"> PlayerName <img src="resources/race_orc.png"> </span>
+  
+    <ul class="hero_ul">
+      <li> <img src="resources/Blademaster.png"> <span class="level_span"> 2 </span>
+        <ul class="hero_ability_ul">
+          <li> Wind Walk <span class="ability_level_span"> 1 </span> </li>
+          <li> Critical Strike <span class="ability_level_span"> 1 </span> </li>
+        </ul>
+      </li>
+      
+      <li> <img src="resources/Shadow Hunter.png"> <span class="level_span"> 1 </span>
+        <ul class="hero_ability_ul">
+          <li> Hex <span class="ability_level_span"> 1 </span> </li>
+        </ul>
+      </li>
+    </ul>
+    
+    <ul class="action_ul">
+      <li> Peon </li>
+      <li> Burrow </li>
+      <li> Peon </li>
+      <li> Grunt </li>
+      <li> Grunt </li>
+    </ul>
+  </div>  -->
+ 
 </body>
 
 </html>
