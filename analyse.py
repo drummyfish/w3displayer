@@ -550,6 +550,7 @@ class Hero:
 class PlayerState:
   def __init__(self):
     self.heroes = []             # will hold Hero objects
+    self.current_action = ""
     self.gold_spent = 0
     self.lumber_spent = 0
     self.last_actions = ["" for i in range(ACTIONS_SHOWN)]
@@ -659,6 +660,24 @@ def get_used_ability(ability_item):            # if the argument represents used
   
   return helper_list[1][:helper_list[1].index("(")].strip()
 
+def process_event_string(event_string):
+  result = event_string
+  
+  helper_position = event_string.find("- ")
+  
+  if helper_position >= 0:
+    result = event_string[helper_position + 2:]
+  else:
+    helper_position = event_string.find("> ")
+  
+    if helper_position >= 0:
+      result = event_string[helper_position + 2:]
+  
+  if len(result) > 20:
+    result = result[:20] + "..."
+  
+  return result
+
 #==========================================================
 
 if len(sys.argv) != 2:
@@ -684,6 +703,11 @@ for event in replay_file.events:
   
   for player_id in players:
     players[player_id].update(time_difference)
+  
+  try:
+    players[event.player_id].state.current_action = process_event_string(str(event))
+  except Exception:
+    pass
   
   if type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
     player = players[event.player_id]

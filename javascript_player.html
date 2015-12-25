@@ -22,9 +22,18 @@
         font-weight: bold;
       }
   
+    .current_action_span
+      {
+        border-top: 1px solid grey;
+        display: block;
+        margin: 10px 6px 0;
+        padding-top: 5px;
+        font-size: 11px;
+      }
+  
     .player_div
       {
-        border: 1px solid black;
+        border: 3px double black;
         margin: 10px;
         width: 170px;
         height: 500px;
@@ -50,25 +59,25 @@
     .orc_div
       {
         background: linear-gradient(to right, #BDEB6E, #D6FCB6, #BDEB6E);
-        border: 3px double #807219;
+        border-color: #807219;
       }
       
     .human_div
       {
-        background-color: #C2D4F2;
-        border: 1px solid blue;
+        background: linear-gradient(to right, #97B9E6, #CDE0FA, #97B9E6);
+        border-color: #30507A;
       }
       
     .undead_div
       {
-        background-color: #E1E4E8;
-        border: 1px solid gray;
+        background: linear-gradient(to right, #C9CED4, #E1EFF5, #C9CED4);
+        border-color: #616161;
       }
       
     .night_elf_div
       {
-        background-color: #DDC9F2;
-        border: 1px solid blue;
+        background: linear-gradient(to right, #BBA1D6, #E4D5F5, #BBA1D6);
+        border-color: #211D4D;
       }
       
     .hero_ability_ul
@@ -287,6 +296,9 @@
                      }
                  }
                
+               var current_action_span = make_element("span",player_div,"current_action_span");
+               current_action_span.innerHTML = player.state.current_action;
+               
                var action_ul = make_element("ul",player_div,"action_ul");
                
                for (var i = 0; i < player.state.last_actions.length; i++)
@@ -309,8 +321,8 @@
   
   <!-- for style testing: 
   
-  <div class="player_div orc_div">
-    <span class="player_span"> PlayerName <img src="resources/race_orc.png"> </span>
+  <div class="player_div night_elf_div">
+    <span class="player_span"> PlayerName <img src="resources/race_night_elf.png"> </span>
   
     <ul class="hero_ul">
       <li> <img src="resources/Blademaster.png"> <span class="level_span"> 2 </span>
@@ -326,6 +338,8 @@
         </ul>
       </li>
     </ul>
+    
+    <span class="current_action_span"> Right click </span>
     
     <ul class="action_ul">
       <li> Peon </li>
