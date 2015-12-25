@@ -8,8 +8,23 @@
     body
       {
         font-family: Arial, Helvetica, sans-serif;
+        margin: 30px;
       }
-  
+
+    #time
+      {
+        display: inline;
+      }
+      
+    #player_control
+      {
+        margin: 30px 10px;
+        padding: 10px;
+        width: 640px;
+        background-color: #E6E6E6;
+        border-radius: 10px;
+      }
+      
     .action_ul
       {
         border-top: 1px solid grey;
@@ -30,13 +45,27 @@
         padding-top: 5px;
         font-size: 11px;
       }
-  
+
+    .apm_span::before
+       { 
+         content: "APM: ";
+       }
+      
+    .apm_span
+      {
+        border-top: 1px solid grey;
+        display: block;
+        margin: 10px 6px 0;
+        padding-top: 5px;
+        font-size: 15px;
+      }
+      
     .player_div
       {
         border: 3px double black;
         margin: 10px;
-        width: 170px;
-        height: 500px;
+        width: 180px;
+        height: 550px;
         float: left;
         padding: 12px;
         font-size: 15px;
@@ -123,8 +152,7 @@
         list-style-type: none;
         padding: 0;
         margin: 0;
-      }
-      
+      }     
   </style>
   
   <script>
@@ -136,6 +164,10 @@
     var w3_time_div;
     var speedup = 3.0;
     var current_line_time = 0;
+    var playing = false;
+    var started_at = 0;
+    var timer_id; 
+    var current_time = 0;
   
     window.onload = function()
       {
@@ -158,23 +190,41 @@
                     {
                       file_lines = reader.result.split("\n");
                       file_loaded = true;
+                      current_line_time = 0;
+                      current_file_line = 0;
+                      started_at = 0;
                     }
-
+                    
                   reader.readAsText(file);
                 }
             });
         }
         
-      function play()
+      function play_pause()
         {
+          if (playing)   // pause
+            {
+              clearInterval(timer_id);
+              started_at = current_time;
+              playing = false;
+              document.getElementById("play_pause").value = ">";
+              return;
+            }
+            
           if (!file_loaded)
             {
               alert("No file has been selected.")
               return;
             }
-            
-          start_time = Date.now()
-          window.setInterval(clock_tick,200);
+          
+       //   current_line_time = 0;
+       //   current_file_line = 0;
+       
+          document.getElementById("play_pause").value = "||";
+       
+          start_time = Date.now();
+          timer_id = window.setInterval(clock_tick,200);
+          playing = true;
         }
        
        function time_to_string(time_ms)
@@ -187,10 +237,11 @@
         
       function clock_tick()
         {
-          var current_time = (Date.now() - start_time) * speedup;
           var line;
           var colon_position;
           var redraw = false;
+          
+          current_time = (Date.now() - start_time) * speedup + started_at;
           
           while (current_line_time <= current_time)    // find the first line after the current time
             {
@@ -296,6 +347,9 @@
                      }
                  }
                
+               var apm_span = make_element("span",player_div,"apm_span");
+               apm_span.innerHTML = player.state.current_apm;
+               
                var current_action_span = make_element("span",player_div,"current_action_span");
                current_action_span.innerHTML = player.state.current_action;
                
@@ -314,9 +368,12 @@
 </head>
 
 <body>
-  <input type="file" id="file_input"></input>
-  <input type="button" value=">" onclick="play()"></input>
-  <div id="time"></div>
+  <div id="player_control">
+    <input type="file" id="file_input"></input>
+    <input type="button" value=">" onclick="play_pause()" id="play_pause"></input>
+    <div id="time"></div>
+  </div>
+  
   <div id="w3_player"></div>
   
   <!-- for style testing: 
@@ -339,6 +396,7 @@
       </li>
     </ul>
     
+    <span class="apm_span"> 240 </span>
     <span class="current_action_span"> Right click </span>
     
     <ul class="action_ul">

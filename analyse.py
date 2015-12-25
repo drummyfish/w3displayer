@@ -7,6 +7,8 @@ TIME_STEP = 500             # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
 RECENTLY_USED_COUNTDOWN = 3 # for how many frames a recently used ability will be shown
 
+APM_INTERVAL = 5000;        # current APM is computed from actions in last APM_INTERVAL ms
+
 TIER_UPGRADE_TIME = 140000;
 
 HERO_REVIVE_TIMES = {  # revive times of heroes by level  
@@ -551,6 +553,8 @@ class PlayerState:
   def __init__(self):
     self.heroes = []             # will hold Hero objects
     self.current_action = ""
+    self.current_apm = 0
+    self.apm_action_buffer = []  # holds APM action times in last APM_INTERVAL ms 
     self.gold_spent = 0
     self.lumber_spent = 0
     self.last_actions = ["" for i in range(ACTIONS_SHOWN)]
@@ -572,6 +576,9 @@ class Player:
     self.state.last_actions.pop()
     self.state.last_actions = [action_string] + self.state.last_actions
   
+  def add_apm_action(self,apm_action):
+    self.state.apm_action_buffer.append(APM_INTERVAL)
+  
   def use_ability(self,ability_name):
     for hero in self.state.heroes:
       for ability in hero.abilities:
@@ -590,6 +597,15 @@ class Player:
     return None
   
   def update(self, time_difference):
+    apm_action_buffer = self.state.apm_action_buffer
+    
+    for position in range(len(apm_action_buffer)):
+      apm_action_buffer[position] -= time_difference
+
+    self.state.apm_action_buffer = [item for item in apm_action_buffer if item > 0]
+
+    self.state.current_apm = len(apm_action_buffer) / (APM_INTERVAL / 1000) * 60
+
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
         hero.revive_time_left = max(hero.revive_time_left - time_difference,-1)
@@ -660,6 +676,24 @@ def get_used_ability(ability_item):            # if the argument represents used
   
   return helper_list[1][:helper_list[1].index("(")].strip()
 
+def check_recordable_action(ability_item):     # checks if given ability is to be recorded, if so, returns string to be recorded, otherwise None
+  if ability_item.find("Use item") >= 0:
+    return "item used"
+  elif ability_item.find("Revive hero") >= 0:
+    return "revive hero (altar)"
+  elif ability_item.find("Give item") >= 0:
+    return "give item"
+  elif ability_item.find("Use ability: kaboom") >= 0:
+    return "kaboom (Goblin sapper)"  
+  elif ability_item.find("Use ability: uproot") >= 0:
+    return "uproot"  
+  elif ability_item.find("Use ability: uproot") >= 0:
+    return "uproot"  
+  elif ability_item.find("Use ability: unsummon") >= 0:
+    return "unsummon"  
+  elif ability_item.find("hero on tavern") >= 0:
+    return "revive hero (tavern)"  
+  
 def process_event_string(event_string):
   result = event_string
   
@@ -700,15 +734,19 @@ for event in replay_file.events:
 
   time_difference = event.time - last_event_time
   last_event_time = event.time
-  
-  for player_id in players:
-    players[player_id].update(time_difference)
-  
+
   try:
     players[event.player_id].state.current_action = process_event_string(str(event))
   except Exception:
     pass
   
+  for player_id in players:
+    players[player_id].update(time_difference)
+  
+  
+  if event.apm:
+    players[event.player_id].add_apm_action(event)
+      
   if type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
     player = players[event.player_id]
     ability_item = w3g.ITEMS.get(event.ability,event.ability)
@@ -721,8 +759,11 @@ for event in replay_file.events:
 
     if ability_item in ACTION_COSTS:
       player.add_action(ability_item)
-    elif ability_item.find("Use item") >= 0:
-      player.add_action("item used")
+    else:
+      recordable = check_recordable_action(ability_item)
+      
+      if recordable != None:
+        player.add_action(recordable)
 
     if trained_ability != None:
       hero = player.get_hero_by_name(trained_ability[0])

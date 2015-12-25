@@ -37,6 +37,7 @@ with open(sys.argv[1]) as input_file:
       print("")
       print(player["name"] + " (" + player["race"] + "):")
       print("  current action: " + player["state"]["current_action"])
+      print("  current apm: " + str(player["state"]["current_apm"]))
       print("  heroes:")
       
       for hero in player["state"]["heroes"]:
