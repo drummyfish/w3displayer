@@ -604,7 +604,7 @@ class Player:
 
     self.state.apm_action_buffer = [item for item in apm_action_buffer if item > 0]
 
-    self.state.current_apm = len(apm_action_buffer) / (APM_INTERVAL / 1000) * 60
+    self.state.current_apm = len(apm_action_buffer) / float(APM_INTERVAL / 1000) * 60
 
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
