@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #  This script implements a simple console player.
 #

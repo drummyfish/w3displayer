@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #  This script takes a Warcraft III replay file (.w3g) and
 #  outputs a text information about the game states at
