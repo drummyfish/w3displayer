@@ -11,9 +11,15 @@
   <title> w3 player </title>
 
   <style>
+    @font-face
+      {
+        font-family: open_sans;
+        src: url(src/OpenSans-Regular.ttf);
+      }
+  
     body
       {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: open_sans, Arial, Helvetica, sans-serif;
         margin: 30px;
       }
 
@@ -168,7 +174,7 @@
     var current_file_line = 0;
     var w3_player_div;
     var w3_time_div;
-    var speedup = 3.0;
+    var speedup = 1.0;
     var current_line_time = 0;
     var playing = false;
     var started_at = 0;
