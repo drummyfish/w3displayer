@@ -1,3 +1,8 @@
+#
+#  This script implements a simple console player.
+#
+#  Miloslav Číž, 2015
+
 import sys
 import time
 import json

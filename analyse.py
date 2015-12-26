@@ -1,3 +1,11 @@
+#
+#  This script takes a Warcraft III replay file (.w3g) and
+#  outputs a text information about the game states at
+#  different times, that can then be played by various
+#  players.
+#
+#  Miloslav Číž, 2015
+
 import w3g
 from sets import Set
 import sys
