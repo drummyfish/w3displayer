@@ -22,9 +22,11 @@ BACKGROUND_COLOR_ORC = (200,255,200)
 BACKGROUND_COLOR_NIGHT_ELF = (220,200,220)
 BACKGROUND_COLOR_UNDEAD = (210,210,210)
 
-VERTICAL_SPACE = 15
-
+VERTICAL_SPACE = 5
+BIG_FONT_SIZE = 20
+MIDDLE_FONT_SIZE = 12
 TMP_FOLDER_NAME = "tmp"
+RESOURCES_FOLDER_NAME = "resources"
 
 if not os.path.exists(TMP_FOLDER_NAME):
   os.makedirs(TMP_FOLDER_NAME)
@@ -34,6 +36,15 @@ player_names = Set()
 with open(sys.argv[1]) as input_file:
   counter = 1
   
+  font_big = ImageFont.truetype("./resources/OpenSans-Regular.ttf",BIG_FONT_SIZE)
+  font_middle = ImageFont.truetype("./resources/OpenSans-Regular.ttf",MIDDLE_FONT_SIZE)
+
+  image_names = sorted((fn for fn in os.listdir(RESOURCES_FOLDER_NAME) if fn.endswith(".png")))
+  images = {}
+  
+  for image_name in image_names:
+    images[image_name] = Image.open(RESOURCES_FOLDER_NAME + "/" + image_name,"r")
+      
   for line in input_file:
     colon_position = line.index(":")
     line = line[colon_position + 1:]
@@ -42,23 +53,43 @@ with open(sys.argv[1]) as input_file:
     for player_id in data:
       player = data[player_id]
       player_names.add(player["name"])
+      y_position = 10
 
       if player["race"] == "orc":
         background_color = BACKGROUND_COLOR_ORC
+        race_image = "race_orc.png"
       elif player["race"] == "human":
         background_color = BACKGROUND_COLOR_HUMAN
+        race_image = "race_human.png"
       elif player["race"] == "undead":
         background_color = BACKGROUND_COLOR_UNDEAD
+        race_image = "race_undead.png"
       else:
         background_color = BACKGROUND_COLOR_NIGHT_ELF
+        race_image = "race_night_elf.png"
 
       image = Image.new("RGBA",IMAGE_SIZE,background_color)
 
+      image.paste(images[race_image],(IMAGE_SIZE[0] - images[race_image].size[0] - 10,10))
+
       draw = ImageDraw.Draw(image)
       
-      font_big = ImageFont.truetype("./resources/OpenSans-Regular.ttf",20)
-      draw.text((MARGIN_LEFT,VERTICAL_SPACE),str(player["name"]),(0,0,0),font=font_big)
+      draw.text((MARGIN_LEFT,y_position),str(player["name"]),(0,0,0),font=font_big)
+      y_position += BIG_FONT_SIZE + VERTICAL_SPACE
 
+      draw.text((MARGIN_LEFT,y_position),"APM: " + str(player["state"]["current_apm"]),(0,0,0),font=font_middle)
+      y_position += MIDDLE_FONT_SIZE + VERTICAL_SPACE
+      
+      draw.text((MARGIN_LEFT,y_position),str(player["state"]["current_action"]),(0,0,0),font=font_middle)     
+      y_position += MIDDLE_FONT_SIZE + VERTICAL_SPACE
+      
+      draw.line((10,y_position + 10,IMAGE_SIZE[0] - 10,y_position + 10),fill=128)
+      y_position += MIDDLE_FONT_SIZE + VERTICAL_SPACE
+      
+      for action in player["state"]["last_actions"]:
+        draw.text((MARGIN_LEFT,y_position),action,(0,0,0),font=font_middle)     
+        y_position += MIDDLE_FONT_SIZE + VERTICAL_SPACE
+      
       image.save(TMP_FOLDER_NAME + "/" + player["name"] + "_" + str(counter).zfill(8) + ".png", "PNG")
     
     counter += 1
