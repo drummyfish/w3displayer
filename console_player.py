@@ -59,6 +59,14 @@ with open(sys.argv[1]) as input_file:
       print(player["name"] + " (" + player["race"] + "):")
       print("  current action: " + player["state"]["current_action"])
       print("  current apm: " + str(player["state"]["current_apm"]))
+      
+      tier_string = str(player["state"]["tier"])
+      tier_time = int(player["state"]["tier_time_left"])
+      
+      if tier_time > 0:
+        tier_string += " (next in " + time_to_string(tier_time) + ")"
+      
+      print("  tier: " + tier_string)
       print("  heroes:")
       
       for hero in player["state"]["heroes"]:

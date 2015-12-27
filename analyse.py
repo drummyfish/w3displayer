@@ -49,6 +49,27 @@ HERO_REVIVE_TIMES = {  # revive times of heroes by level
    10 : 357500 
   }
 
+TIER1_STRINGS = [
+  w3g.ITEMS[b'htow'],
+  w3g.ITEMS[b'ogre'],
+  w3g.ITEMS[b'etol'],
+  w3g.ITEMS[b'unpl']
+  ]
+
+TIER2_STRINGS = [
+  w3g.ITEMS[b'hkee'],
+  w3g.ITEMS[b'ostr'],
+  w3g.ITEMS[b'etoa'],
+  w3g.ITEMS[b'unp1']
+  ]
+
+TIER3_STRINGS = [
+  w3g.ITEMS[b'hcas'],
+  w3g.ITEMS[b'ofrt'],
+  w3g.ITEMS[b'etoe'],
+  w3g.ITEMS[b'unp2']
+  ]
+
 NEUTRAL_HERO_STRINGS = [
   w3g.ITEMS[b'Nngs'],
   w3g.ITEMS[b'Nbrn'],
@@ -562,8 +583,8 @@ class Hero:
   def train_ability(self, ability_name):    
     for ability in self.abilities:
       if ability.name == ability_name:
-        self.ability = min(ability.level + 1,3)
-        self.level += 1
+        ability.level = min(ability.level + 1,3)
+        self.level = min(self.level + 1,10)
         return
     
     new_ability = Ability()
@@ -607,6 +628,9 @@ class Player:
   def add_apm_action(self,apm_action):
     self.state._apm_action_buffer.append(APM_INTERVAL)
   
+  def next_tier(self):
+    self.state.tier_time_left = TIER_UPGRADE_TIME
+  
   def tome_of_retraining_used(self):
     #TODO
     pass
@@ -636,7 +660,7 @@ class Player:
 
     self.state._apm_action_buffer = [item for item in apm_action_buffer if item > 0]
 
-    self.state.current_apm = len(apm_action_buffer) / float(APM_INTERVAL / 1000) * 60
+    self.state.current_apm = int(len(apm_action_buffer) / float(APM_INTERVAL / 1000) * 60)
 
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
@@ -647,6 +671,12 @@ class Player:
       for ability in hero.abilities:   
         if ability.used_recently_countdown > 0:
           ability.used_recently_countdown -= time_difference / float(TIME_STEP)
+
+    if self.state.tier_time_left > 0:
+      self.state.tier_time_left -= max(time_difference,-1)
+      
+      if self.state.tier_time_left < 0:
+        self.state.tier = min(self.state.tier + 1,3)
 
 def get_players(replay_file):        # returns dict with players, key is the player id
   player_ids = Set()
@@ -814,3 +844,6 @@ for event in replay_file.events:
           new_hero.revive_time_left = HERO_REVIVE_TIMES[0]
         
         player.state.heroes.append(new_hero)
+        
+    if (player.state.tier == 1 and ability_item in TIER2_STRINGS) or (player.state.tier == 2 and ability_item in TIER3_STRINGS):
+      player.next_tier()
