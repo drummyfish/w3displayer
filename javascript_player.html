@@ -86,7 +86,20 @@
         padding-top: 5px;
         font-size: 15px;
       }
+    
+    .tier_span
+      {
+        display: block;
+        margin: 10px 6px 0;
+        padding-top: 5px;
+        font-size: 15px;
+      }
       
+    .tier_span::before
+      {
+         content: "tier: ";
+      }
+    
     .player_div
       {
         border: 3px double black;
@@ -373,6 +386,12 @@
                        ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
                      }
                  }
+               
+               var tier_span = make_element("span",player_div,"tier_span");
+               tier_span.innerHTML = player.state.tier;
+               
+               if (player.state.tier_time_left > 0)
+                 tier_span.innerHTML += " (" + time_to_string(player.state.tier_time_left) + ")"
                
                var apm_span = make_element("span",player_div,"apm_span");
                apm_span.innerHTML = player.state.current_apm;
