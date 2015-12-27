@@ -57,7 +57,7 @@ NEUTRAL_HERO_STRINGS = [
   w3g.ITEMS[b'Npld'],
   w3g.ITEMS[b'Ntin'],
   w3g.ITEMS[b'Nfir'],
-  w3g.ITEMS[b'Nalc']
+  w3g.ITEMS[b'Nalc'],
   ]
 
 HERO_STRINGS = [
@@ -562,14 +562,14 @@ class Hero:
   def train_ability(self, ability_name):    
     for ability in self.abilities:
       if ability.name == ability_name:
-        ability.level += 1
+        self.ability = min(ability.level + 1,3)
         self.level += 1
         return
     
     new_ability = Ability()
     new_ability.name = ability_name
     self.abilities.append(new_ability)
-    self.level += 1
+    self.level = min(self.level + 1,10)
   
   def is_alive(self):
     return self.revive_time_left <= 0
@@ -606,6 +606,10 @@ class Player:
   
   def add_apm_action(self,apm_action):
     self.state.apm_action_buffer.append(APM_INTERVAL)
+  
+  def tome_of_retraining_used(self):
+    #TODO
+    pass
   
   def use_ability(self,ability_name):
     for hero in self.state.heroes:
@@ -692,6 +696,9 @@ def list_to_str(what_list,separator=","):
 
 def get_trained_ability_name(ability_item):    # if the argument represents hero ability, (hero,ability) tuple is returned, otherwise None is returned
   helper_list = ability_item.split(":")
+  
+  if helper_list[0] == "Firelord":        # casing fix
+    helper_list[0] = "FireLord"
   
   if len(helper_list) != 2 or (not helper_list[0] in HERO_STRINGS):
     return None
