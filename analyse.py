@@ -30,6 +30,7 @@ import json
 TIME_STEP = 500             # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
 RECENTLY_USED_COUNTDOWN = 3 # for how many frames a recently used ability will be shown
+BIAS_TIMER = 500
 
 APM_INTERVAL = 5000;        # current APM is computed from actions in last APM_INTERVAL ms
 
@@ -579,8 +580,12 @@ class Hero:
     self.has_been_trained = False     # whether the hero has already been trained
     self.level = 0                    # hero level
     self.abilities = []               # will hold Ability objects
+    self._train_ability_timer = 0     # to prevent training an ability multiple times when two fast actions occur very quickly
   
-  def train_ability(self, ability_name):    
+  def train_ability(self, ability_name):   
+    if self._train_ability_timer > 1:   # prevent fast occuring ability clicks to train
+      return
+  
     for ability in self.abilities:
       if ability.name == ability_name:
         ability.level = min(ability.level + 1,3)
@@ -591,6 +596,7 @@ class Hero:
     new_ability.name = ability_name
     self.abilities.append(new_ability)
     self.level = min(self.level + 1,10)
+    self._train_ability_timer = BIAS_TIMER
   
   def is_alive(self):
     return self.revive_time_left <= 0
@@ -667,6 +673,8 @@ class Player:
         hero.revive_time_left = max(hero.revive_time_left - time_difference,-1)
       else:
         hero.has_been_trained = True
+      
+      hero._train_ability_timer = max(hero._train_ability_timer - time_difference,0)
       
       for ability in hero.abilities:   
         if ability.used_recently_countdown > 0:
