@@ -553,10 +553,11 @@ class Ability:
 
 class Hero:
   def __init__(self):
-    self.name = ""        # hero name
+    self.name = ""                    # hero name
     self.revive_time_left = -1
-    self.level = 0        # hero level
-    self.abilities = []   # will hold Ability objects
+    self.has_been_trained = False     # whether the hero has already been trained
+    self.level = 0                    # hero level
+    self.abilities = []               # will hold Ability objects
   
   def train_ability(self, ability_name):    
     for ability in self.abilities:
@@ -600,6 +601,9 @@ class Player:
     self.state.last_actions.pop()
     self.state.last_actions = [action_string] + self.state.last_actions
   
+  def cancel_untrained_heroes(self):
+    self.state.heroes =  [hero for hero in self.state.heroes if hero.has_been_trained]
+  
   def add_apm_action(self,apm_action):
     self.state.apm_action_buffer.append(APM_INTERVAL)
   
@@ -633,6 +637,8 @@ class Player:
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
         hero.revive_time_left = max(hero.revive_time_left - time_difference,-1)
+      else:
+        hero.has_been_trained = True
       
       for ability in hero.abilities:   
         if ability.used_recently_countdown > 0:
@@ -790,14 +796,15 @@ for event in replay_file.events:
         player.add_action(recordable)
 
     if trained_ability != None:
-      hero = player.get_hero_by_name(trained_ability[0])
-      hero.train_ability(trained_ability[1])
+      player.get_hero_by_name(trained_ability[0]).train_ability(trained_ability[1])
     elif ability_item in HERO_STRINGS:     # hero training
-      if not player.has_hero(ability_item):                   # training a new hero
+      if not player.has_hero(ability_item) and len(player.state.heroes) < 3:    # training a new hero
+        player.cancel_untrained_heroes()
+        
         new_hero = Hero()
         new_hero.name = ability_item
         
-        if not ability_item in NEUTRAL_HERO_STRINGS:          # neutral heroes trained instantly 
+        if not ability_item in NEUTRAL_HERO_STRINGS:                            # neutral heroes trained instantly 
           new_hero.revive_time_left = HERO_REVIVE_TIMES[0]
         
         player.state.heroes.append(new_hero)
