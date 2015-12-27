@@ -543,7 +543,7 @@ ACTION_COSTS = {       # gold, lumber, food
 
 class W3JSONEncoder(json.JSONEncoder):
   def default(self, o):
-    return o.__dict__
+    return dict((key, value) for key, value in o.__dict__.iteritems() if not callable(value) and not key.startswith("_"))
 
 class Ability:
   def __init__(self):
@@ -579,7 +579,7 @@ class PlayerState:
     self.heroes = []             # will hold Hero objects
     self.current_action = ""
     self.current_apm = 0
-    self.apm_action_buffer = []  # holds APM action times in last APM_INTERVAL ms 
+    self._apm_action_buffer = []  # holds APM action times in last APM_INTERVAL ms 
     self.gold_spent = 0
     self.lumber_spent = 0
     self.last_actions = ["" for i in range(ACTIONS_SHOWN)]
@@ -605,7 +605,7 @@ class Player:
     self.state.heroes =  [hero for hero in self.state.heroes if hero.has_been_trained]
   
   def add_apm_action(self,apm_action):
-    self.state.apm_action_buffer.append(APM_INTERVAL)
+    self.state._apm_action_buffer.append(APM_INTERVAL)
   
   def tome_of_retraining_used(self):
     #TODO
@@ -629,12 +629,12 @@ class Player:
     return None
   
   def update(self, time_difference):
-    apm_action_buffer = self.state.apm_action_buffer
+    apm_action_buffer = self.state._apm_action_buffer
     
     for position in range(len(apm_action_buffer)):
       apm_action_buffer[position] -= time_difference
 
-    self.state.apm_action_buffer = [item for item in apm_action_buffer if item > 0]
+    self.state._apm_action_buffer = [item for item in apm_action_buffer if item > 0]
 
     self.state.current_apm = len(apm_action_buffer) / float(APM_INTERVAL / 1000) * 60
 
@@ -779,7 +779,6 @@ for event in replay_file.events:
   
   for player_id in players:
     players[player_id].update(time_difference)
-  
   
   if event.apm:
     players[event.player_id].add_apm_action(event)
