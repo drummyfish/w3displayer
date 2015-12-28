@@ -152,20 +152,35 @@
     .hero_ability_ul
       {
         font-size: 12px;
-        padding-left: 5px;
+        padding: 10px 5px 0 0;
         margin: 0 3px 5px;
+        width: 90px;
+        float: right;   
       }
       
     .hero_ul img
       {
         box-shadow: 2px 2px 5px #888888;
+   /*     float: left;
+        clear: left; */
+      }
+      
+    .hero_ul
+      {
+   /*     float: left;
+        clear: left;  */
+      }
+      
+     .hero_ul li
+      {
+        position: relative;
       }
       
     .level_span
       {
-        position: relative;
-        left: -27px;
-        bottom: 10px;
+        position: absolute;
+        left: 50px;
+        bottom: 8px;
         font-weight: bold;
         font-family: "Lucida Console", Monaco, monospace;
         font-size: 30px;
@@ -202,7 +217,7 @@
     var current_file_line = 0;
     var w3_player_div;
     var w3_time_div;
-    var speedup = 1.0;
+    var speedup = 5.0;
     var current_line_time = 0;
     var playing = false;
     var started_at = 0;
@@ -352,13 +367,12 @@
                    var hero_image = make_element("img",hero_li,"");
                    hero_image.src = "resources/" + hero.name + ".png"
                    
-                   var level_span = make_element("span",hero_li,"level_span");
-                   
                    level = hero.level
                    
                    if (level == 0)
                      level = 1;
                    
+                   var level_span = make_element("span",hero_li,"level_span");
                    level_span.innerHTML = level;
                    
                    var revive_time = hero.revive_time_left;
