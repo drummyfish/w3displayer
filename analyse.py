@@ -591,6 +591,7 @@ class Hero:
       if ability.name == ability_name:
         ability.level = min(ability.level + 1,3)
         self.level = min(self.level + 1,10)
+        self._train_ability_timer = BIAS_TIMER
         return
     
     new_ability = Ability()
