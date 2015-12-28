@@ -21,3 +21,18 @@ Due to the replay format nature, replay analysis can not unfortunately easily ou
 an early demo:
 
 [![video](http://img.youtube.com/vi/6FCSJNOZixk/0.jpg)](http://www.youtube.com/watch?v=6FCSJNOZixk "video")
+
+usage
+-----
+
+```
+python analyse.py replay.w3g > replay.txt
+```
+
+Then you can for example play the replay with console player:
+
+```
+python console_player.py replay.txt
+```
+
+Or with JavaScript player by opening javascript_player.html in your browser (Chrome) and loading the replay.txt.
