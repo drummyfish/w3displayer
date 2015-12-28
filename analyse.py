@@ -583,6 +583,9 @@ class Hero:
     self.abilities = []               # will hold Ability objects
     self._train_ability_timer = 0     # to prevent training an ability multiple times when two fast actions occur very quickly
   
+    self.alive = False
+    self._surely_alive = True         # used for determining which hero is dead
+  
   def train_ability(self, ability_name):   
     if self._train_ability_timer > 1:   # prevent fast occuring ability clicks to train
       return
@@ -599,20 +602,18 @@ class Hero:
     self.abilities.append(new_ability)
     self.level = min(self.level + 1,10)
     self._train_ability_timer = BIAS_TIMER
-  
-  def is_alive(self):
-    return self.revive_time_left <= 0
 
 class PlayerState:
   def __init__(self):
-    self.heroes = []             # will hold Hero objects
+    self.heroes = []                # will hold Hero objects
     self.current_action = ""
     self.current_apm = 0
-    self._apm_action_buffer = []  # holds APM action times in last APM_INTERVAL ms 
+    self._apm_action_buffer = []    # holds APM action times in last APM_INTERVAL ms 
     self.expenses = [0,0,0]
     self.last_actions = ["" for i in range(ACTIONS_SHOWN)]
     self.tier = 1
-    self.tier_time_left = -1     # how long till next tier
+    self.tier_time_left = -1        # how long till next tier
+    self._reviving_hero_timer = -1  # used to count time for unknown dead hero revival
 
 class Player:
   def __init__(self):
@@ -634,6 +635,22 @@ class Player:
   
   def add_apm_action(self,apm_action):
     self.state._apm_action_buffer.append(APM_INTERVAL)
+  
+  def reviving_hero(self):           # call when hero starts being revived at altar
+    self.state._reviving_hero_timer = HERO_REVIVE_TIMES[10]
+    
+    for hero in self.state.heroes:
+      hero._surely_alive = False
+  
+  def select_hero(self,hero_name):   # call when a hero is selected
+    if self.state._reviving_hero_timer < 0:
+      return
+    
+    for hero in self.state.heroes:
+      if hero.name == hero_name:
+        hero._surely_alive = True    # if a hero is selected, they must be alive
+        hero.alive = True
+        break
   
   def next_tier(self):
     self.state.tier_time_left = TIER_UPGRADE_TIME
@@ -659,9 +676,23 @@ class Player:
       
     return None
   
-  def update(self, time_difference):
-    apm_action_buffer = self.state._apm_action_buffer
+  def update(self, time_difference):  
+    self.state._reviving_hero_timer = max(self.state._reviving_hero_timer - time_difference,-1)
     
+    if self.state._reviving_hero_timer <= 0:
+      for hero in self.state.heroes:
+        hero._surely_alive = True
+        hero.alive = True
+    else:
+      not_surely_alive = [h for h in self.state.heroes if (not h._surely_alive and h.has_been_trained)]
+      
+      if len(not_surely_alive) == 0:
+        self.state._reviving_hero_timer = -1
+      if len(not_surely_alive) == 1:     # only one hero that can be dead => they are dead
+        not_surely_alive[0].alive = False
+    
+    apm_action_buffer = self.state._apm_action_buffer
+
     for position in range(len(apm_action_buffer)):
       apm_action_buffer[position] -= time_difference
 
@@ -672,8 +703,9 @@ class Player:
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
         hero.revive_time_left = max(hero.revive_time_left - time_difference,-1)
-      else:
+      elif not hero.has_been_trained:
         hero.has_been_trained = True
+        hero.alive = True
       
       hero._train_ability_timer = max(hero._train_ability_timer - time_difference,0)
       
@@ -821,8 +853,11 @@ for event in replay_file.events:
   
   if event.apm:
     players[event.player_id].add_apm_action(event)
-      
-  if type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
+    
+  if type(event) is w3g.SelectSubgroup:
+    ability_item = w3g.ITEMS.get(event.ability,event.ability)  
+    players[event.player_id].select_hero(ability_item)  
+  elif type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
     player = players[event.player_id]
     ability_item = w3g.ITEMS.get(event.ability,event.ability)
     trained_ability = get_trained_ability_name(ability_item)
@@ -845,6 +880,9 @@ for event in replay_file.events:
       
       if recordable != None:
         player.add_action(recordable)
+
+        if recordable == "revive hero (altar)":
+          player.reviving_hero()
 
     if trained_ability != None:
       player.get_hero_by_name(trained_ability[0]).train_ability(trained_ability[1])

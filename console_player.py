@@ -23,7 +23,7 @@ import sys
 import time
 import json
 
-SPEEDUP = 1.0
+SPEEDUP = 10.0
 
 def time_to_string(time_in_ms):
   seconds = time_in_ms / 1000
@@ -73,6 +73,9 @@ with open(sys.argv[1]) as input_file:
         helper_string = "    "
         helper_string += hero["name"]
         helper_string += " " + str(max(1,hero["level"]))
+        
+        if not hero["alive"]:
+          helper_string += " (dead)"
         
         if hero["revive_time_left"] > 0:
           helper_string += ", revives: " + time_to_string(hero["revive_time_left"])
