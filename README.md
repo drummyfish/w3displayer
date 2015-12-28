@@ -20,4 +20,4 @@ Due to the replay format nature, replay analysis can not unfortunately easily ou
 
 an early demo:
 
-[![video](http://img.youtube.com/vi/YofND7_cxPw/0.jpg)](http://www.youtube.com/watch?v=YofND7_cxPw "video")
+[![video](http://img.youtube.com/vi/6FCSJNOZixk/0.jpg)](http://www.youtube.com/watch?v=6FCSJNOZixk "video")
