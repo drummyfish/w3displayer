@@ -29,7 +29,7 @@
     @font-face
       {
         font-family: open_sans;
-        src: url(src/OpenSans-Regular.ttf);
+        src: url(resources/OpenSans-Regular.ttf);
       }
   
     body
@@ -167,14 +167,6 @@
     .hero_ul img
       {
         box-shadow: 2px 2px 5px #888888;
-   /*     float: left;
-        clear: left; */
-      }
-      
-    .hero_ul
-      {
-   /*     float: left;
-        clear: left;  */
       }
       
      .hero_ul li
@@ -223,12 +215,13 @@
     var current_file_line = 0;
     var w3_player_div;
     var w3_time_div;
-    var speedup = 1.0;
+    var speedup = 30.0;
     var current_line_time = 0;
     var playing = false;
     var started_at = 0;
     var timer_id; 
     var current_time = 0;
+    var end_time_string = 0;
   
     window.onload = function()
       {
@@ -251,6 +244,20 @@
                     {
                       file_lines = reader.result.split("\n");
                       file_loaded = true;
+                      
+                      var i;
+                      
+                      for (i = file_lines.length - 1; i >= 0; i--)
+                        {
+                          var colon_position = file_lines[i].indexOf(":");
+                        
+                          if (colon_position < 0)
+                            continue;
+                          
+                          end_time_string = time_to_string(parseInt(file_lines[i].substring(0,colon_position)));
+                          break;
+                        }
+                      
                       current_line_time = 0;
                       current_file_line = 0;
                       started_at = 0;
@@ -259,177 +266,211 @@
                   reader.readAsText(file);
                 }
             });
-        }
+      }
         
-      function play_pause()
-        {
-          if (playing)   // pause
-            {
-              clearInterval(timer_id);
-              started_at = current_time;
-              playing = false;
-              document.getElementById("play_pause").value = ">";
-              return;
-            }
+    function play_pause()
+      {
+        if (playing)   // pause
+          {
+            clearInterval(timer_id);
+            started_at = current_time;
+            playing = false;
+            document.getElementById("play_pause").value = ">";
+            return;
+          }
             
-          if (!file_loaded)
-            {
-              alert("No file has been selected.")
-              return;
-            }
+        if (!file_loaded)
+          {
+            alert("No file has been selected.")
+            return;
+          }
        
-          document.getElementById("play_pause").value = "||";
+        document.getElementById("play_pause").value = "||";
        
-          start_time = Date.now();
-          timer_id = window.setInterval(clock_tick,200);
-          playing = true;
-        }
+        start_time = Date.now();
+        timer_id = window.setInterval(clock_tick,200);
+        playing = true;
+      }
        
-       function time_to_string(time_ms)
-         {
-           seconds = Math.floor(time_ms / 1000);
-           minutes = Math.floor(seconds / 60);
-           seconds = seconds % 60;
-           return minutes.toString() + ":" + seconds.toString()
-         }
+    function time_to_string(time_ms)
+      {
+        seconds = Math.floor(time_ms / 1000);
+        minutes = Math.floor(seconds / 60);
+        seconds = seconds % 60;
+        return minutes.toString() + ":" + seconds.toString()
+      }
         
-      function clock_tick()
-        {
-          var line;
-          var colon_position;
-          var redraw = false;
+    function clock_tick()
+      {
+        var line;
+        var colon_position;
+        var redraw = false;
+        var end_of_input = false;
+        
+        current_time = (Date.now() - start_time) * speedup + started_at;
           
-          current_time = (Date.now() - start_time) * speedup + started_at;
+        if (current_file_line >= file_lines.length)
+          end_of_input = true;
+        else while (current_line_time <= current_time)    // find the first line after the current time
+          {   
+            if (current_file_line >= file_lines.length)
+              {
+                end_of_input = true;
+                break;
+              }
+                
+            line = file_lines[current_file_line];
+            colon_position = line.indexOf(":");
+            current_line_time = parseInt(line.substring(0,colon_position));
+            current_file_line++;
+            redraw = true;
+          }
           
-          while (current_line_time <= current_time)    // find the first line after the current time
+        if (end_of_input)
+          {
+            clearInterval(timer_id);
+            started_at = current_time;
+            playing = false;
+            return;
+          }
+                
+        time_div.innerHTML = time_to_string(current_time) + " / " + end_time_string;
+          
+        if (redraw)
+          try
             {
-              line = file_lines[current_file_line];
-              colon_position = line.indexOf(":");
-              current_line_time = parseInt(line.substring(0,colon_position));
-              current_file_line++;
-              redraw = true;
+              redraw_state(line.substring(colon_position + 1));
             }
-          
-          time_div.innerHTML = time_to_string(current_time);
-          
-          if (redraw)
-            redraw_state(line.substring(colon_position + 1))
-         }
+          catch(err)
+            {
+              console.log("Error while redrawing state.");
+            }
+      }
          
-       function make_element(name, parent, class_name)
-         {
-           var new_element = document.createElement(name);
-           parent.appendChild(new_element);
-           new_element.className = class_name;
-           return new_element;
-         }
+    function make_element(name, parent, class_name)
+      {
+        var new_element = document.createElement(name);
+        parent.appendChild(new_element);
+        new_element.className = class_name;
+        return new_element;
+      }
          
-       function redraw_state(json_string)
-         {
-           while (w3_player_div.firstChild)    // clear child nodes
-             {
-               w3_player_div.removeChild(w3_player_div.firstChild);
-             }
+    function shorten_string(input_string, length)
+      {
+        if (input_string.length >= length)
+          {
+            input_string = input_string.substring(0,length - 3) + "...";
+          }
+          
+        return input_string;
+      }
+         
+    function redraw_state(json_string)
+      {
+        while (w3_player_div.firstChild)    // clear child nodes
+          {
+            w3_player_div.removeChild(w3_player_div.firstChild);
+          }
 
-           parsed_data = JSON.parse(json_string)  
+        parsed_data = JSON.parse(json_string)  
+        
+        w3_player_div.innerHTML = ""
            
-           w3_player_div.innerHTML = ""
-           
-           for(var player_id in parsed_data)
-             {
-               var player = parsed_data[player_id];
-               var player_div = make_element("div",w3_player_div,"player_div");
-               var player_span = make_element("span",player_div,"player_span");
-               player_span.innerHTML += player.name;
-               var race_image = make_element("img",player_span,"");
+        for(var player_id in parsed_data)
+          {
+            var player = parsed_data[player_id];
+            var player_div = make_element("div",w3_player_div,"player_div");
+            var player_span = make_element("span",player_div,"player_span");
+            player_span.innerHTML += shorten_string(player.name,13);
+            var race_image = make_element("img",player_span,"");
                
-               if (player.race == "orc")
-                 {
-                   race_image.src = "resources/race_orc.png";
-                   player_div.className += " orc_div";
-                 }
-               else if (player.race == "human")
-                 {
-                   race_image.src = "resources/race_human.png";
-                   player_div.className += " human_div";
-                 }
-               else if (player.race == "undead")
-                 {
-                   race_image.src = "resources/race_undead.png";
-                   player_div.className += " undead_div";
-                 }
-               else
-                 {
-                   race_image.src = "resources/race_night_elf.png";
-                   player_div.className += " night_elf_div";
-                 }
+            if (player.race == "orc")
+              {
+                race_image.src = "resources/race_orc.png";
+                player_div.className += " orc_div";
+              }
+            else if (player.race == "human")
+              {
+                race_image.src = "resources/race_human.png";
+                player_div.className += " human_div";
+              }
+            else if (player.race == "undead")
+              {
+                race_image.src = "resources/race_undead.png";
+                player_div.className += " undead_div";
+              }
+            else
+              {
+                race_image.src = "resources/race_night_elf.png";
+                player_div.className += " night_elf_div";
+              }
                  
-               var hero_ul = make_element("ul",player_div,"hero_ul");
+            var hero_ul = make_element("ul",player_div,"hero_ul");
                
-               for (var i = 0; i < player.state.heroes.length; i++)
-                 {
-                   var hero = player.state.heroes[i];
-                   var hero_li = make_element("li",hero_ul,"");
-                   var hero_image = make_element("img",hero_li,"");
-                   hero_image.src = "resources/" + hero.name + ".png"
+            for (var i = 0; i < player.state.heroes.length; i++)
+              {
+                var hero = player.state.heroes[i];
+                var hero_li = make_element("li",hero_ul,"");
+                var hero_image = make_element("img",hero_li,"");
+                hero_image.src = "resources/" + hero.name + ".png"
                    
-                   if (!hero.alive)
-                     hero_image.className = "dead";
+                if (!hero.alive)
+                  hero_image.className = "dead";
                    
-                   level = hero.level
+                level = hero.level
                    
-                   if (level == 0)
-                     level = 1;
+                if (level == 0)
+                  level = 1;
                    
-                   var level_span = make_element("span",hero_li,"level_span");
-                   level_span.innerHTML = level;
+                var level_span = make_element("span",hero_li,"level_span");
+                  level_span.innerHTML = level;
                    
-                   var revive_time = hero.revive_time_left;
+                var revive_time = hero.revive_time_left;
                    
-                   if (revive_time > 0)
-                     {
-                       var revive_span = make_element("span",hero_li,"revive_span");
-                       revive_span.innerHTML = time_to_string(revive_time);
-                       hero_image.className = "dead";
-                     }
+                if (revive_time > 0)
+                  {
+                    var revive_span = make_element("span",hero_li,"revive_span");
+                    revive_span.innerHTML = time_to_string(revive_time);
+                    hero_image.className = "dead";
+                  }
                    
-                   var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
+                var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
                    
-                   for (var j = 0; j < hero.abilities.length; j++)
-                     {
-                       var ability_li = make_element("li",hero_ability_ul,"");
-                       ability_li.innerHTML = hero.abilities[j].name;
+                for (var j = 0; j < hero.abilities.length; j++)
+                  {
+                    var ability_li = make_element("li",hero_ability_ul,"");
+                    ability_li.innerHTML = shorten_string(hero.abilities[j].name,13);
                        
-                       if (hero.abilities[j].used_recently_countdown > 0)
-                         ability_li.className = "recently_used"
+                    if (hero.abilities[j].used_recently_countdown > 0)
+                      ability_li.className = "recently_used"
                                         
-                       var ability_level_span = make_element("span",ability_li,"ability_level_span");
-                       ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
-                     }
-                 }
+                    var ability_level_span = make_element("span",ability_li,"ability_level_span");
+                    ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
+                  }
+              }
                
-               var tier_span = make_element("span",player_div,"tier_span");
-               tier_span.innerHTML = player.state.tier;
+            var tier_span = make_element("span",player_div,"tier_span");
+            tier_span.innerHTML = player.state.tier;
                
-               if (player.state.tier_time_left > 0)
-                 tier_span.innerHTML += " (" + time_to_string(player.state.tier_time_left) + ")"
+            if (player.state.tier_time_left > 0)
+              tier_span.innerHTML += " (" + time_to_string(player.state.tier_time_left) + ")"
                
-               var apm_span = make_element("span",player_div,"apm_span");
-               apm_span.innerHTML = player.state.current_apm;
+            var apm_span = make_element("span",player_div,"apm_span");
+            apm_span.innerHTML = player.state.current_apm;
                
-               var current_action_span = make_element("span",player_div,"current_action_span");
-               current_action_span.innerHTML = player.state.current_action;
+            var current_action_span = make_element("span",player_div,"current_action_span");
+            current_action_span.innerHTML = player.state.current_action;
                
-               var action_ul = make_element("ul",player_div,"action_ul");
+            var action_ul = make_element("ul",player_div,"action_ul");
                
-               for (var i = 0; i < player.state.last_actions.length; i++)
-                 {
-                   var action_li = make_element("li",action_ul,"");
-                   action_li.innerHTML = player.state.last_actions[i];
-                 }
-             }
+            for (var i = 0; i < player.state.last_actions.length; i++)
+              {
+                var action_li = make_element("li",action_ul,"");
+                action_li.innerHTML = player.state.last_actions[i];
+              }
+          }
             
-         }
+      }
   
   </script>
 </head>
