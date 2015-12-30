@@ -47,7 +47,7 @@ TIER_UPGRADE_TIME = 140000;
 ALTAR_HERO_COST = (425,100,5)
 TAVERN_HERO_COST = (425,135,5)
 
-HERO_REVIVE_TIMES = {  # revive times of heroes by level  
+HERO_REVIVE_TIMES = {       # revive times of heroes by level  
     0 :  55000,
     1 :  35750,
     2 :  71500,
@@ -630,6 +630,7 @@ class PlayerState:
     self.tier = 1
     self.tier_time_left = -1        # how long till next tier
     self._reviving_hero_timer = -1  # used to count time for unknown dead hero revival
+    self._time_since_hero_revival = 0
 
 class Player:
   def __init__(self):
@@ -674,6 +675,7 @@ class Player:
     for hero in self.state.heroes:
       if hero.name == hero_name:
         hero._surely_alive = True    # if a hero is selected, they must be alive
+        hero.revive_time_left = -1
         hero.alive = True
         break
   
@@ -702,19 +704,29 @@ class Player:
     return None
   
   def update(self, time_difference):  
+    # dead heroes:
+    
     self.state._reviving_hero_timer = max(self.state._reviving_hero_timer - time_difference,-1)
     
-    if self.state._reviving_hero_timer <= 0:
+    if self.state._reviving_hero_timer <= 0:   # all heroes should be alive now
+      self._time_since_hero_revival = 0
+      
       for hero in self.state.heroes:
         hero._surely_alive = True
         hero.alive = True
     else:
+      self._time_since_hero_revival += time_difference
+      
       not_surely_alive = [h for h in self.state.heroes if (not h._surely_alive and h.has_been_trained)]
       
       if len(not_surely_alive) == 0:
         self.state._reviving_hero_timer = -1
       if len(not_surely_alive) == 1:     # only one hero that can be dead => they are dead
-        not_surely_alive[0].alive = False
+        hero = not_surely_alive[0]
+        hero.alive = False
+        hero.revive_time_left = HERO_REVIVE_TIMES[hero.level] - self._time_since_hero_revival
+    
+    # APM:
     
     apm_action_buffer = self.state._apm_action_buffer
 
@@ -725,10 +737,12 @@ class Player:
 
     self.state.current_apm = int(len(apm_action_buffer) / float(APM_INTERVAL / 1000) * 60)
 
+    # other hero updates:
+
     for hero in self.state.heroes:
       if hero.revive_time_left > 0:
         hero.revive_time_left = max(hero.revive_time_left - time_difference,-1)
-      elif not hero.has_been_trained:
+      else:
         hero.has_been_trained = True
         hero.alive = True
       

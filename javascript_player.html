@@ -203,6 +203,13 @@
       
     .revive_span
       {
+        position: absolute;
+        font-weight: bold;
+        color: white;
+        -webkit-text-stroke: 1px black;
+        font-size: 25px;
+        left: 12px;
+        top: 7px;
       }
     
     .recently_used
@@ -443,6 +450,20 @@
                 var level_span = make_element("span",hero_li,"level_span");
                   level_span.innerHTML = level;
                    
+                var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
+                   
+                for (var j = 0; j < hero.abilities.length; j++)
+                  {
+                    var ability_li = make_element("li",hero_ability_ul,"");
+                    ability_li.innerHTML = shorten_string(hero.abilities[j].name,11);
+                       
+                    if (hero.abilities[j].used_recently_countdown > 0)
+                      ability_li.className = "recently_used"
+                                        
+                    var ability_level_span = make_element("span",ability_li,"ability_level_span");
+                    ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
+                  }
+                  
                 var revive_time = hero.revive_time_left;
                    
                 if (revive_time > 0)
@@ -450,20 +471,6 @@
                     var revive_span = make_element("span",hero_li,"revive_span");
                     revive_span.innerHTML = time_to_string(revive_time);
                     hero_image.className = "dead";
-                  }
-                   
-                var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
-                   
-                for (var j = 0; j < hero.abilities.length; j++)
-                  {
-                    var ability_li = make_element("li",hero_ability_ul,"");
-                    ability_li.innerHTML = shorten_string(hero.abilities[j].name,13);
-                       
-                    if (hero.abilities[j].used_recently_countdown > 0)
-                      ability_li.className = "recently_used"
-                                        
-                    var ability_level_span = make_element("span",ability_li,"ability_level_span");
-                    ability_level_span.innerHTML = " " + hero.abilities[j].level.toString();
                   }
               }
                
@@ -546,7 +553,7 @@
   
   <div id="w3_player"></div>
   
-  <!-- for style testing: 
+  <!-- for style testing:  
   
   <div class="player_div night_elf_div">
     <span class="player_span"> PlayerName <img src="resources/race_night_elf.png"> </span>
@@ -563,6 +570,8 @@
         <ul class="hero_ability_ul">
           <li> Hex <span class="ability_level_span"> 1 </span> </li>
         </ul>
+        
+        <span class="revive_span"> 2:05 </span>
       </li>
     </ul>
     
