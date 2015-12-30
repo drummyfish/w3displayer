@@ -39,7 +39,8 @@ import json
 TIME_STEP = 500             # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
 RECENTLY_USED_COUNTDOWN = 3 # for how many frames a recently used ability will be shown
-BIAS_TIMER = 500
+BIAS_TIMER = 750            # time for which training new abilities will be disabled after training one, to avoid multiple-click training
+VERSION = "0.1"
 
 APM_INTERVAL = 5000;        # current APM is computed from actions in last APM_INTERVAL ms
 TIER_UPGRADE_TIME = 140000;
@@ -573,6 +574,12 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'dthb'] : (0,0,0),     # thunderbloom bulb
   }
 
+def print_help():
+  print(u"w3displayer analyse:")
+  print(u"Analyses given Warcraft III replay file (.w3g) and outputs a file that can be played with w3displayer players.")
+  print(u"usage: python analyse.py replay.w3g > replay.txt")
+  print(u"GPL license, by Miloslav Číž, version " + VERSION)
+
 class W3JSONEncoder(json.JSONEncoder):
   def default(self, o):
     return dict((key, value) for key, value in o.__dict__.iteritems() if not callable(value) and not key.startswith("_"))
@@ -842,9 +849,18 @@ def process_event_string(event_string):
 
 if len(sys.argv) != 2:
   print("Expecting a filename argument.")
+  print_help()
   quit()
 
-replay_file = w3g.File(sys.argv[1])
+if sys.argv[1] == "--help" or sys.argv[1] == "-h":
+  print_help()
+  quit()
+
+try:
+  replay_file = w3g.File(sys.argv[1])
+except Exception:
+  print("Could not open given file.")
+  quit()
 
 players = get_players(replay_file)
 

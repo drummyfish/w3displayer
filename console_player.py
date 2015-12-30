@@ -23,13 +23,29 @@ import sys
 import time
 import json
 
-SPEEDUP = 10.0
+SPEEDUP = 1.0
+VERSION = "0.1"
+
+def print_help():
+  print(u"w3displayer console player:")
+  print(u"Plays given warcraft III replay analysed with analyse.py in console.")
+  print(u"usage: python console_player.py replay.txt")
+  print(u"GPL license, by Miloslav Číž, version " + VERSION)
 
 def time_to_string(time_in_ms):
   seconds = time_in_ms / 1000
   minutes = seconds / 60
   seconds = seconds % 60
   return str(minutes) + ":" + str(seconds)
+
+if len(sys.argv) != 2:
+  print("Expecting file argument.")
+  print_help()
+  quit()
+
+if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+  print_help()
+  quit()
 
 with open(sys.argv[1]) as input_file:
   start_time = time.time()
