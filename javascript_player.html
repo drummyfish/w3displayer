@@ -77,7 +77,13 @@
        { 
          content: "APM: ";
        }
-      
+     
+    .dead
+      {
+        -webkit-filter: contrast(50%) grayscale(100%);
+        filter: contrast(50%) grayscale(100%);
+      }
+     
     .apm_span
       {
         border-top: 1px solid grey;
@@ -367,6 +373,9 @@
                    var hero_image = make_element("img",hero_li,"");
                    hero_image.src = "resources/" + hero.name + ".png"
                    
+                   if (!hero.alive)
+                     hero_image.className = "dead";
+                   
                    level = hero.level
                    
                    if (level == 0)
@@ -381,6 +390,7 @@
                      {
                        var revive_span = make_element("span",hero_li,"revive_span");
                        revive_span.innerHTML = time_to_string(revive_time);
+                       hero_image.className = "dead";
                      }
                    
                    var hero_ability_ul = make_element("ul",hero_li,"hero_ability_ul");
@@ -446,7 +456,7 @@
         </ul>
       </li>
       
-      <li> <img src="resources/Shadow Hunter.png"> <span class="level_span"> 1 </span>
+      <li> <img src="resources/Shadow Hunter.png" class="dead"> <span class="level_span"> 1 </span>
         <ul class="hero_ability_ul">
           <li> Hex <span class="ability_level_span"> 1 </span> </li>
         </ul>

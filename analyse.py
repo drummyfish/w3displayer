@@ -22,6 +22,15 @@
 # You should have received a copy of the GNU General Public License
 # along with w3displayer.  If not, see <http://www.gnu.org/licenses/>.
 
+# ====================================
+# TODOs and ideas
+#
+# - tome of retraining
+# - hero deaths could be determined more precisely by looking into
+#   the future fot the moment when the dead hero is first selected,
+#   this could be handled by a single function
+# ====================================
+
 import w3g
 from sets import Set
 import sys
@@ -630,6 +639,15 @@ class Player:
     self.state.last_actions.pop()
     self.state.last_actions = [action_string] + self.state.last_actions
   
+  def get_max_hero_level(self):
+    maximum = 0
+  
+    for hero in self.state.heroes:
+      if hero.level > maximum:
+        maximum = hero.level
+      
+    return maximum
+  
   def cancel_untrained_heroes(self):
     self.state.heroes =  [hero for hero in self.state.heroes if hero.has_been_trained]
   
@@ -637,7 +655,7 @@ class Player:
     self.state._apm_action_buffer.append(APM_INTERVAL)
   
   def reviving_hero(self):           # call when hero starts being revived at altar
-    self.state._reviving_hero_timer = HERO_REVIVE_TIMES[10]
+    self.state._reviving_hero_timer = HERO_REVIVE_TIMES[self.get_max_hero_level()]
     
     for hero in self.state.heroes:
       hero._surely_alive = False
@@ -764,7 +782,7 @@ def list_to_str(what_list,separator=","):
     result += str(item)
 
   return result
-
+  
 def get_trained_ability_name(ability_item):    # if the argument represents hero ability, (hero,ability) tuple is returned, otherwise None is returned
   helper_list = ability_item.split(":")
   
