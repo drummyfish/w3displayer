@@ -38,6 +38,21 @@
         margin: 30px;
       }
 
+    #timeline
+      {
+        width: 100%;
+        height: 20px;
+        margin: 10px 0;
+        border: 1px solid gray;
+      }
+      
+    #seeker
+      {
+        height: 100%;
+        width: 0;
+        background-color: gray;
+      }
+      
     #time
       {
         display: inline;
@@ -215,18 +230,20 @@
     var current_file_line = 0;
     var w3_player_div;
     var w3_time_div;
-    var speedup = 30.0;
+    var seeker_div;
+    var speedup = 1.0;
     var current_line_time = 0;
     var playing = false;
     var started_at = 0;
     var timer_id; 
     var current_time = 0;
-    var end_time_string = 0;
+    var end_time = 0;
   
     window.onload = function()
       {
         w3_player_div = document.getElementById("w3_player");  
         time_div = document.getElementById("time"); 
+        seeker_div = document.getElementById("seeker"); 
       
         var fileInput = document.getElementById('file_input');
         
@@ -254,7 +271,7 @@
                           if (colon_position < 0)
                             continue;
                           
-                          end_time_string = time_to_string(parseInt(file_lines[i].substring(0,colon_position)));
+                          end_time = parseInt(file_lines[i].substring(0,colon_position));
                           break;
                         }
                       
@@ -334,7 +351,8 @@
             return;
           }
                 
-        time_div.innerHTML = time_to_string(current_time) + " / " + end_time_string;
+        time_div.innerHTML = time_to_string(current_time) + " / " + time_to_string(end_time);
+        seeker_div.style.width = Math.round((current_time / end_time) * 100).toString() + "%";
           
         if (redraw)
           try
@@ -471,15 +489,59 @@
           }
             
       }
+    
+    function change_time(new_time)
+      {
+        start_time = Date.now();
+        started_at = Math.round(new_time);
+        current_time = started_at;
+        current_file_line = 0;
+        current_line_time = 0;
+        
+        if (!playing)
+          clock_tick();     // redraw
+      }
+    
+    function timeline_clicked(event)
+      {
+        var event = event ? event : window.event;
+        var position = (event.pageX - seeker_div.offsetLeft) / document.getElementById("timeline").offsetWidth;
+        
+        change_time(end_time * position);
+      }
   
+    function speed_change()
+      {
+        try
+          {
+            speedup = parseFloat(document.getElementById("speed").value);
+            
+            if (speedup <= 0)
+              {
+                speedup = 1.0;
+                return;
+              }
+            
+            change_time(current_time);  // this has to be here
+          }
+        catch (err)
+          {
+          }
+      }
+      
   </script>
 </head>
 
 <body>
   <div id="player_control">
+    speed: <input type="number" id="speed" value="1" onchange="speed_change()"></input>
     <input type="file" id="file_input"></input>
     <input type="button" value=">" onclick="play_pause()" id="play_pause"></input>
     <div id="time"></div>
+    <div id="timeline" onclick="timeline_clicked(event)">
+      <div id="seeker">
+      </div>
+    </div>
   </div>
   
   <div id="w3_player"></div>
