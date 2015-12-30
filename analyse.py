@@ -47,6 +47,9 @@ TIER_UPGRADE_TIME = 140000;
 ALTAR_HERO_COST = (425,100,5)
 TAVERN_HERO_COST = (425,135,5)
 
+ALTAR_REVIVE_COST = (490,120,0)    # approximate average cost
+TAVERN_REVIVE_COST = (800,200,0)   # approximate average cost
+
 HERO_REVIVE_TIMES = {       # revive times of heroes by level  
     0 :  55000,
     1 :  35750,
@@ -175,50 +178,51 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'Ofar'] : ALTAR_HERO_COST,   # far seer
   w3g.ITEMS[b'Oshd'] : ALTAR_HERO_COST,   # shadow hunter
   w3g.ITEMS[b'Otch'] : ALTAR_HERO_COST,   # tauren chieftain
-  w3g.ITEMS[b'opeo'] : (0,0,0),           # peon
-  w3g.ITEMS[b'ogru'] : (0,0,0),           # grunt
-  w3g.ITEMS[b'ohun'] : (0,0,0),           # troll headhunter
-  w3g.ITEMS[b'otbk'] : (0,0,0),           # troll berserker
-  w3g.ITEMS[b'oshm'] : (0,0,0),           # shaman
-  w3g.ITEMS[b'odoc'] : (0,0,0),           # witch doctor
-  w3g.ITEMS[b'ospw'] : (0,0,0),           # spirit walker
-  w3g.ITEMS[b'orai'] : (0,0,0),           # raider
-  w3g.ITEMS[b'okod'] : (0,0,0),           # kodo beast
-  w3g.ITEMS[b'ocat'] : (0,0,0),           # demolisher
-  w3g.ITEMS[b'otbr'] : (0,0,0),           # troll batrider
-  w3g.ITEMS[b'owyv'] : (0,0,0),           # wind rider
-  w3g.ITEMS[b'otau'] : (0,0,0),           # tauren
-  w3g.ITEMS[b'ogre'] : (0,0,0),           # great hall
-  w3g.ITEMS[b'ostr'] : (0,0,0),           # stronghold
-  w3g.ITEMS[b'ofrt'] : (0,0,0),           # fortress
-  w3g.ITEMS[b'osld'] : (0,0,0),           # spirit lodge
-  w3g.ITEMS[b'otto'] : (0,0,0),           # tauren totem
-  w3g.ITEMS[b'obea'] : (0,0,0),           # beastiary
-  w3g.ITEMS[b'ovln'] : (0,0,0),           # voodoo lounge
-  w3g.ITEMS[b'obar'] : (0,0,0),           # orc barracks
-  w3g.ITEMS[b'otrb'] : (0,0,0),           # orc burrow
-  w3g.ITEMS[b'owtw'] : (0,0,0),           # watch tower
+  w3g.ITEMS[b'opeo'] : (75,0,1),          # peon
+  w3g.ITEMS[b'ogru'] : (200,0,3),         # grunt
+  w3g.ITEMS[b'ohun'] : (135,20,2),        # troll headhunter
+  w3g.ITEMS[b'otbk'] : (135,20,2),        # troll berserker
+  w3g.ITEMS[b'oshm'] : (130,20,2),        # shaman
+  w3g.ITEMS[b'odoc'] : (145,25,2),        # witch doctor
+  w3g.ITEMS[b'ospw'] : (195,35,3),        # spirit walker
+  w3g.ITEMS[b'orai'] : (180,40,3),        # raider
+  w3g.ITEMS[b'okod'] : (255,60,4),        # kodo beast
+  w3g.ITEMS[b'ocat'] : (220,50,4),        # demolisher
+  w3g.ITEMS[b'otbr'] : (160,40,2),        # troll batrider
+  w3g.ITEMS[b'owyv'] : (265,40,4),        # wind rider
+  w3g.ITEMS[b'otau'] : (280,80,5),        # tauren
+  w3g.ITEMS[b'ogre'] : (385,185,0),       # great hall
+  w3g.ITEMS[b'ostr'] : (315,190,0),       # stronghold
+  w3g.ITEMS[b'ofrt'] : (325,190,0),       # fortress
+  w3g.ITEMS[b'osld'] : (150,150,0),       # spirit lodge
+  w3g.ITEMS[b'otto'] : (135,155,0),       # tauren totem
+  w3g.ITEMS[b'obea'] : (145,140,0),       # beastiary
+  w3g.ITEMS[b'ovln'] : (130,30,0),        # voodoo lounge
+  w3g.ITEMS[b'obar'] : (180,50,0),        # orc barracks
+  w3g.ITEMS[b'otrb'] : (160,40,0),        # orc burrow
+  w3g.ITEMS[b'owtw'] : (110,80,0),        # watch tower
                           # war mill missing
-  w3g.ITEMS[b'oalt'] : (0,0,0),           # altar of storms
+  w3g.ITEMS[b'oalt'] : (180,50,0),        # altar of storms
   w3g.ITEMS[b'Roaa'] : (0,0,0),           # orc artillery
-  w3g.ITEMS[b'Roar'] : (0,0,0),           # unit armor
-  w3g.ITEMS[b'Robf'] : (0,0,0),           # burning oil
-  w3g.ITEMS[b'Robk'] : (0,0,0),           # berserker
-  w3g.ITEMS[b'Robs'] : (0,0,0),           # berserker strength
+  w3g.ITEMS[b'Roar'] : (225,225,0),       # unit armor               average cost
+  w3g.ITEMS[b'Robf'] : (50,150,0),        # burning oil
+  w3g.ITEMS[b'Robk'] : (75,175,0),        # berserker
+  w3g.ITEMS[b'Robs'] : (50,150,0),        # berserker strength
   w3g.ITEMS[b'Roch'] : (0,0,0),           # chaos
-  w3g.ITEMS[b'Roen'] : (0,0,0),           # ensnare
-  w3g.ITEMS[b'Rolf'] : (0,0,0),           # liquid fire
-  w3g.ITEMS[b'Rome'] : (0,0,0),           # melee weapons
-  w3g.ITEMS[b'Ropg'] : (0,0,0),           # pillage
-  w3g.ITEMS[b'Rora'] : (0,0,0),           # ranged weapons
-  w3g.ITEMS[b'Rorb'] : (0,0,0),           # reinforced defenses
-  w3g.ITEMS[b'Rosp'] : (0,0,0),           # spiked barricades
-  w3g.ITEMS[b'Rost'] : (0,0,0),           # shaman training
-  w3g.ITEMS[b'Rotr'] : (0,0,0),           # troll regeneration
-  w3g.ITEMS[b'Rovs'] : (0,0,0),           # envenomed spears
-  w3g.ITEMS[b'Rowd'] : (0,0,0),           # witch doctor training
-  w3g.ITEMS[b'Rows'] : (0,0,0),           # pulverize
-  w3g.ITEMS[b'Rowt'] : (0,0,0),           # spirit walker training
+  w3g.ITEMS[b'Roen'] : (50,75,0),         # ensnare
+  w3g.ITEMS[b'Rolf'] : (75,125,0),        # liquid fire
+  w3g.ITEMS[b'Rwdm'] : (100,150,0),       # war drums
+  w3g.ITEMS[b'Rome'] : (150,175,0),       # melee weapons            average cost
+  w3g.ITEMS[b'Ropg'] : (75,25,0),         # pillage
+  w3g.ITEMS[b'Rora'] : (150,200,0),       # ranged weapons           average cost
+  w3g.ITEMS[b'Rorb'] : (50,200,0),        # reinforced defenses
+  w3g.ITEMS[b'Rosp'] : (50,175,0),        # spiked barricades        average cost
+  w3g.ITEMS[b'Rost'] : (100,100,0),       # shaman training          average cost
+  w3g.ITEMS[b'Rotr'] : (100,100,0),       # troll regeneration
+  w3g.ITEMS[b'Rovs'] : (100,150,0),       # envenomed spears
+  w3g.ITEMS[b'Rowd'] : (100,100,0),       # witch doctor training    average cost
+  w3g.ITEMS[b'Rows'] : (100,250,0),       # pulverize
+  w3g.ITEMS[b'Rowt'] : (100,100,0),       # spirit walker training   average cost
   # night elf:
   w3g.ITEMS[b'Edem'] : ALTAR_HERO_COST,   # demon hunter
   w3g.ITEMS[b'Ekee'] : ALTAR_HERO_COST,   # keeper of the grove
@@ -333,11 +337,63 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'Nfir'] : TAVERN_HERO_COST,  # firelord
   w3g.ITEMS[b'Nalc'] : TAVERN_HERO_COST,  # goblin alchemist
   
+  w3g.ITEMS[b'ngsp'] : (215,100,2), # goblin sapper
+  w3g.ITEMS[b'ngsp'] : (215,100,2), # goblin sapper
+  w3g.ITEMS[b'nzep'] : (240,60,0),  # goblin zeppelin
+  w3g.ITEMS[b'nzep'] : (240,60,0),  # goblin zeppelin
+  w3g.ITEMS[b'ngir'] : (375,100,4), # goblin shredder
+  w3g.ITEMS[b'nbot'] : (170,50,0),  # transport ship
+  
+  w3g.ITEMS[b'nsfp'] : (195,10,2),  # forest troll shadow priest
+  w3g.ITEMS[b'nftb'] : (245,30,3),  # forest troll berserker
+  w3g.ITEMS[b'nfsh'] : (305,40,4),  # forest troll high priest
+  w3g.ITEMS[b'ngrk'] : (145,10,2),  # mud golem
+  w3g.ITEMS[b'nogm'] : (300,0,3),   # ogre mauler
+  w3g.ITEMS[b'nass'] : (250,30,3),  # assassin
+  w3g.ITEMS[b'nkob'] : (90,0,1),    # kobold
+  w3g.ITEMS[b'nkog'] : (255,30,3),  # kobold geomancer
+  w3g.ITEMS[b'nmrr'] : (150,10,2),  # murloc huntsman
+  w3g.ITEMS[b'nmfs'] : (140,0,2),   # murloc flesheater
+  w3g.ITEMS[b'nslf'] : (255,30,3),  # sludge flinger
+  w3g.ITEMS[b'nstl'] : (320,50,4),  # satyr soulstealer
+  w3g.ITEMS[b'nsts'] : (255,30,30), # satyr shadowdancer
+  w3g.ITEMS[b'nfps'] : (0,0,0),     # polar furbolg shaman
+  w3g.ITEMS[b'nfrs'] : (255,30,3),  # furbolg shaman
+  w3g.ITEMS[b'nthl'] : (365,150,6), # thunder lizard
+  w3g.ITEMS[b'ngnb'] : (215,20,2),  # gnoll brute
+  w3g.ITEMS[b'ngnw'] : (215,20,2),  # gnoll warden
+  w3g.ITEMS[b'nomg'] : (320,50,4),  # ogre magi
+  w3g.ITEMS[b'nitt'] : (200,20,2),  # ice troll trapper
+  w3g.ITEMS[b'nits'] : (245,30,3),  # ice troll berserker
+  w3g.ITEMS[b'ngnv'] : (305,35,4),  # gnoll overseer
+  w3g.ITEMS[b'nrog'] : (150,0,2),   # rogue
+  w3g.ITEMS[b'ncen'] : (195,0,2),   # centaur outrunner
+  w3g.ITEMS[b'nhrr'] : (215,20,2),  # harpy rogue
+  w3g.ITEMS[b'nhrw'] : (240,30,2),  # harpy windwitch
+  w3g.ITEMS[b'nrzm'] : (350,60,4),  # razormane medicine man
+  w3g.ITEMS[b'nnwa'] : (215,0,2),   # nerubian warrior
+  w3g.ITEMS[b'nnwl'] : (200,35,3),  # nerubian webspinner
+  w3g.ITEMS[b'nrvs'] : (255,30,3),  # frost revenant
+  w3g.ITEMS[b'nskf'] : (255,25,2),  # burning archer
+  w3g.ITEMS[b'nowb'] : (195,0,3),   # wildkin
+  w3g.ITEMS[b'ntrt'] : (295,35,3),  # giant sea turtle
+  w3g.ITEMS[b'nlsn'] : (315,0,4),   # makrura snapper
+  w3g.ITEMS[b'nmsn'] : (215,20,3),  # murgul snarecaster
+  w3g.ITEMS[b'nlds'] : (500,100,4), # makrura deepseer
+  w3g.ITEMS[b'nanb'] : (95,5,1),    # barbed arachnathid
+  w3g.ITEMS[b'nbdm'] : (145,0,2),   # blue dragonspawn meddler
+  w3g.ITEMS[b'nfps'] : (275,30,3),  # polar furbolg shaman
+  w3g.ITEMS[b'nmgw'] : (340,15,4),  # magnataur warrior
+  w3g.ITEMS[b'npfl'] : (155,0,2),   # fel beast
+  w3g.ITEMS[b'ndrm'] : (155,15,2),  # draenei disciple
+  w3g.ITEMS[b'nvdw'] : (155,15,2),  # voidwalker
+  w3g.ITEMS[b'ndrd'] : (260,40,4),  # draenei darkslayer
+  
   w3g.ITEMS[b'amrc'] : (0,0,0),     # amulet of recall
   w3g.ITEMS[b'ankh'] : (0,0,0),     # ankh of reincarnation
   w3g.ITEMS[b'belv'] : (0,0,0),     # boots of quel\'thalas +6
   w3g.ITEMS[b'bgst'] : (0,0,0),     # belt of giant strength +6
-  w3g.ITEMS[b'bspd'] : (0,0,0),     # boots of speed
+  w3g.ITEMS[b'bspd'] : (250,0,0),   # boots of speed
   w3g.ITEMS[b'ccmd'] : (0,0,0),     # scepter of mastery
   w3g.ITEMS[b'ciri'] : (0,0,0),     # robe of the magi +6
   w3g.ITEMS[b'ckng'] : (0,0,0),     # crown of kings +5
@@ -359,33 +415,33 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'rde3'] : (0,0,0),     # ring of protection +4
   w3g.ITEMS[b'rhth'] : (0,0,0),     # khadgar's gem of health
   w3g.ITEMS[b'rst1'] : (0,0,0),     # gauntlets of ogre strength +3
-  w3g.ITEMS[b'ofir'] : (0,0,0),     # orb of fire
+  w3g.ITEMS[b'ofir'] : (275,0,0),   # orb of fire
   w3g.ITEMS[b'ofro'] : (0,0,0),     # orb of frost
-  w3g.ITEMS[b'olig'] : (0,0,0),     # orb of lightning
+  w3g.ITEMS[b'olig'] : (375,0,0),   # orb of lightning
   w3g.ITEMS[b'oli2'] : (0,0,0),     # orb of lightning
   w3g.ITEMS[b'oven'] : (0,0,0),     # orb of venom
   w3g.ITEMS[b'odef'] : (0,0,0),     # orb of darkness
   w3g.ITEMS[b'ocor'] : (0,0,0),     # orb of corruption
   w3g.ITEMS[b'pdiv'] : (0,0,0),     # potion of divinity
-  w3g.ITEMS[b'phea'] : (0,0,0),     # potion of healing
+  w3g.ITEMS[b'phea'] : (150,0,0),   # potion of healing
   w3g.ITEMS[b'pghe'] : (0,0,0),     # potion of greater healing
-  w3g.ITEMS[b'pinv'] : (0,0,0),     # potion of invisibility
+  w3g.ITEMS[b'pinv'] : (100,0,0),   # potion of invisibility
   w3g.ITEMS[b'pgin'] : (0,0,0),     # potion of greater invisibility
-  w3g.ITEMS[b'pman'] : (0,0,0),     # potion of mana
+  w3g.ITEMS[b'pman'] : (200,0,0),   # potion of mana
   w3g.ITEMS[b'pgma'] : (0,0,0),     # potion of greater mana
   w3g.ITEMS[b'pnvu'] : (0,0,0),     # potion of invulnerability
-  w3g.ITEMS[b'pnvl'] : (0,0,0),     # potion of lesser invulnerability
+  w3g.ITEMS[b'pnvl'] : (150,0,0),   # potion of lesser invulnerability
   w3g.ITEMS[b'pres'] : (0,0,0),     # potion of restoration
   w3g.ITEMS[b'pspd'] : (0,0,0),     # potion of speed
   w3g.ITEMS[b'rlif'] : (0,0,0),     # ring of regeneration
   w3g.ITEMS[b'rwiz'] : (0,0,0),     # sobi mask
   w3g.ITEMS[b'sfog'] : (0,0,0),     # horn of the clouds
-  w3g.ITEMS[b'shea'] : (0,0,0),     # scroll of healing
+  w3g.ITEMS[b'shea'] : (250,0,0),   # scroll of healing
   w3g.ITEMS[b'sman'] : (0,0,0),     # scroll of mana
-  w3g.ITEMS[b'spro'] : (0,0,0),     # scroll of protection
+  w3g.ITEMS[b'spro'] : (150,0,0),   # scroll of protection
   w3g.ITEMS[b'sres'] : (0,0,0),     # scroll of restoration
   w3g.ITEMS[b'ssil'] : (0,0,0),     # staff of silence
-  w3g.ITEMS[b'stwp'] : (0,0,0),     # scroll of town portal
+  w3g.ITEMS[b'stwp'] : (350,0,0),   # scroll of town portal
   w3g.ITEMS[b'tels'] : (0,0,0),     # goblin night scope
   w3g.ITEMS[b'tdex'] : (0,0,0),     # tome of agility
   w3g.ITEMS[b'texp'] : (0,0,0),     # tome of experience
@@ -429,8 +485,8 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'hcun'] : (0,0,0),     # hood of cunning
   w3g.ITEMS[b'mcou'] : (0,0,0),     # medallion of courage
   w3g.ITEMS[b'hval'] : (0,0,0),     # helm of valor
-  w3g.ITEMS[b'cnob'] : (0,0,0),     # circlet of nobility
-  w3g.ITEMS[b'prvt'] : (0,0,0),     # periapt of vitality
+  w3g.ITEMS[b'cnob'] : (175,0,0),   # circlet of nobility
+  w3g.ITEMS[b'prvt'] : (350,0,0),   # periapt of vitality
   w3g.ITEMS[b'tgxp'] : (0,0,0),     # tome of greater experience
   w3g.ITEMS[b'mnst'] : (0,0,0),     # mana stone
   w3g.ITEMS[b'hlst'] : (0,0,0),     # health stone
@@ -464,16 +520,16 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'iwbr'] : (0,0,0),     # ironwood branch
   w3g.ITEMS[b'jdrn'] : (0,0,0),     # jade ring
   w3g.ITEMS[b'drph'] : (0,0,0),     # druid pouch
-  w3g.ITEMS[b'hslv'] : (0,0,0),     # healing salve
+  w3g.ITEMS[b'hslv'] : (100,0,0),   # healing salve
   w3g.ITEMS[b'pclr'] : (0,0,0),     # clarity potion
-  w3g.ITEMS[b'plcl'] : (0,0,0),     # lesser clarity potion
+  w3g.ITEMS[b'plcl'] : (70,0,0),    # lesser clarity potion
   w3g.ITEMS[b'rej1'] : (0,0,0),     # minor replenishment potion
   w3g.ITEMS[b'rej2'] : (0,0,0),     # lesser replenishment potion
   w3g.ITEMS[b'rej3'] : (0,0,0),     # replenishment potion
   w3g.ITEMS[b'rej4'] : (0,0,0),     # greater replenishment potion
   w3g.ITEMS[b'rej5'] : (0,0,0),     # lesser scroll of replenishment
   w3g.ITEMS[b'rej6'] : (0,0,0),     # greater scroll of replenishment
-  w3g.ITEMS[b'sreg'] : (0,0,0),     # scroll of regeneration
+  w3g.ITEMS[b'sreg'] : (100,0,0),   # scroll of regeneration
   w3g.ITEMS[b'gold'] : (0,0,0),     # gold coins
   w3g.ITEMS[b'lmbr'] : (0,0,0),     # bundle of lumber
   w3g.ITEMS[b'fgun'] : (0,0,0),     # flare gun
@@ -488,19 +544,19 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'vamp'] : (0,0,0),     # vampiric potion
   w3g.ITEMS[b'woms'] : (0,0,0),     # wand of mana stealing
   w3g.ITEMS[b'tcas'] : (0,0,0),     # tiny castle
-  w3g.ITEMS[b'tgrh'] : (0,0,0),     # tiny great hall
-  w3g.ITEMS[b'tsct'] : (0,0,0),     # ivory tower
+  w3g.ITEMS[b'tgrh'] : (600,185,0), # tiny great hall
+  w3g.ITEMS[b'tsct'] : (40,20,0),   # ivory tower
   w3g.ITEMS[b'wshs'] : (0,0,0),     # wand of shadowsight
-  w3g.ITEMS[b'tret'] : (0,0,0),     # tome of retraining
+  w3g.ITEMS[b'tret'] : (300,0,0),   # tome of retraining
   w3g.ITEMS[b'sneg'] : (0,0,0),     # staff of negation
-  w3g.ITEMS[b'stel'] : (0,0,0),     # staff of teleportation
+  w3g.ITEMS[b'stel'] : (150,0,0),   # staff of teleportation
   w3g.ITEMS[b'spre'] : (0,0,0),     # staff of preservation
-  w3g.ITEMS[b'mcri'] : (0,0,0),     # mechanical critter
+  w3g.ITEMS[b'mcri'] : (50,0,0),    # mechanical critter
   w3g.ITEMS[b'spsh'] : (0,0,0),     # amulet of spell shield
   w3g.ITEMS[b'sbok'] : (0,0,0),     # spell book
-  w3g.ITEMS[b'ssan'] : (0,0,0),     # staff of sanctuary
-  w3g.ITEMS[b'shas'] : (0,0,0),     # scroll of speed
-  w3g.ITEMS[b'dust'] : (0,0,0),     # dust of appearance
+  w3g.ITEMS[b'ssan'] : (250,0,0),   # staff of sanctuary
+  w3g.ITEMS[b'shas'] : (50,0,0),    # scroll of speed
+  w3g.ITEMS[b'dust'] : (75,0,0),    # dust of appearance
   w3g.ITEMS[b'oslo'] : (0,0,0),     # orb of slow
   w3g.ITEMS[b'dsum'] : (0,0,0),     # diamond of summoning
   w3g.ITEMS[b'sor1'] : (0,0,0),     # shadow orb +1
@@ -642,6 +698,11 @@ class Player:
     result = "player:" + self.name + "(" + self.race + ")"
     result += ";" + str(self.state)
     return result
+  
+  def add_expense(self, expense):
+    self.state.expenses[0] += expense[0]
+    self.state.expenses[1] += expense[1]
+    self.state.expenses[2] += expense[2]
   
   def add_action(self,action_string):
     self.state.last_actions.pop()
@@ -917,12 +978,7 @@ for event in replay_file.events:
 
     if ability_item in ACTION_COSTS:
       player.add_action(ability_item)
-      
-      cost = ACTION_COSTS[ability_item]
-      
-      player.state.expenses[0] += cost[0]
-      player.state.expenses[1] += cost[1]
-      player.state.expenses[2] += cost[2]
+      player.add_expense(ACTION_COSTS[ability_item])
     else:
       recordable = check_recordable_action(ability_item)
       
@@ -931,6 +987,9 @@ for event in replay_file.events:
 
         if recordable == "revive hero (altar)":
           player.reviving_hero()
+          player.add_expense(ALTAR_REVIVE_COST)
+        elif recordable == "revive hero (tavern)":
+          player.add_expense(TAVERN_REVIVE_COST)
 
     if trained_ability != None:
       player.get_hero_by_name(trained_ability[0]).train_ability(trained_ability[1])
