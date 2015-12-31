@@ -29,6 +29,8 @@
 # - hero deaths could be determined more precisely by looking into
 #   the future fot the moment when the dead hero is first selected,
 #   this could be handled by a single function
+# - add information about units trained, buildings built and upgrades
+#   upgraded so far
 # ====================================
 
 import w3g
@@ -39,7 +41,7 @@ import json
 TIME_STEP = 500             # time of periodic update, in miliseconds
 ACTIONS_SHOWN = 5           # how many last player action to show
 RECENTLY_USED_COUNTDOWN = 3 # for how many frames a recently used ability will be shown
-BIAS_TIMER = 750            # time for which training new abilities will be disabled after training one, to avoid multiple-click training
+BIAS_TIMER = 750            # time used to prevent abilities to avoid fast multiple-click actions
 VERSION = "0.1"
 
 APM_INTERVAL = 5000;        # current APM is computed from actions in last APM_INTERVAL ms
@@ -630,6 +632,21 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'dthb'] : (0,0,0),     # thunderbloom bulb
   }
 
+BIAS_CONTROLLED_ABILITIES = [       # abilities stat are being checked agains BIAS_TIMER
+  w3g.ITEMS[b'\x3B\x00\x0D\x00'],
+  w3g.ITEMS[b'\x3C\x00\x0D\x00'],
+  w3g.ITEMS[b'\x3D\x00\x0D\x00'],
+  w3g.ITEMS[b'\x3E\x00\x0D\x00'],
+  w3g.ITEMS[b'\x3F\x00\x0D\x00'],
+  w3g.ITEMS[b'\xEE\x01\x0D\x00'],
+  w3g.ITEMS[b'\xEF\x01\x0D\x00'],
+  w3g.ITEMS[b'\xF0\x01\x0D\x00'],
+  w3g.ITEMS[b'\xF1\x01\x0D\x00'],
+  w3g.ITEMS[b'\xF2\x01\x0D\x00']
+  ]
+
+BIAS_CONTROLLED_ABILITIES += HERO_STRINGS
+
 def print_help():
   print(u"w3displayer analyse:")
   print(u"Analyses given Warcraft III replay file (.w3g) and outputs a file that can be played with w3displayer players.")
@@ -687,6 +704,7 @@ class PlayerState:
     self.tier_time_left = -1        # how long till next tier
     self._reviving_hero_timer = -1  # used to count time for unknown dead hero revival
     self._time_since_hero_revival = 0
+    self._temporarily_blocked_abilities = []  # will hold [action_name, block_time_left] elements
 
 class Player:
   def __init__(self):
@@ -707,6 +725,16 @@ class Player:
   def add_action(self,action_string):
     self.state.last_actions.pop()
     self.state.last_actions = [action_string] + self.state.last_actions
+  
+  def temporarily_block(self, ability_name):  # all actions with 'ability_name' name will be ignored in next BIAS_TIMER to prevent multiple click events
+    self.state._temporarily_blocked_abilities.append([ability_name,BIAS_TIMER])
+  
+  def is_temporarily_blocked(self, ability_name):
+    for ability in self.state._temporarily_blocked_abilities:
+      if ability[0] == ability_name:
+        return True
+    
+    return False
   
   def get_max_hero_level(self):
     maximum = 0
@@ -786,6 +814,13 @@ class Player:
         hero = not_surely_alive[0]
         hero.alive = False
         hero.revive_time_left = HERO_REVIVE_TIMES[hero.level] - self._time_since_hero_revival
+    
+    # temporarily blocked actions:
+    
+    for action in self.state._temporarily_blocked_abilities:
+      action[1] -= time_difference
+      
+    self.state._temporarily_blocked_abilities = [ability for ability in self.state._temporarily_blocked_abilities if ability[1] > 0]
     
     # APM:
     
@@ -957,53 +992,61 @@ for event in replay_file.events:
   except Exception:
     pass
   
-  for player_id in players:
-    players[player_id].update(time_difference)
+  try:
+    for player_id in players:
+      players[player_id].update(time_difference)
   
-  if event.apm:
-    players[event.player_id].add_apm_action(event)
+    if event.apm:
+      players[event.player_id].add_apm_action(event)
     
-  if type(event) is w3g.SelectSubgroup:
-    ability_item = w3g.ITEMS.get(event.ability,event.ability)  
-    players[event.player_id].select_hero(ability_item)  
-  elif type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
-    player = players[event.player_id]
-    ability_item = w3g.ITEMS.get(event.ability,event.ability)
-    trained_ability = get_trained_ability_name(ability_item)
-
-    used_ability = get_used_ability(ability_item)
+    if type(event) is w3g.SelectSubgroup:
+      ability_item = w3g.ITEMS.get(event.ability,event.ability)  
+      players[event.player_id].select_hero(ability_item)  
+    elif type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
+      player = players[event.player_id]
+      ability_item = w3g.ITEMS.get(event.ability,event.ability)
     
-    if used_ability != None:
-      player.use_ability(used_ability)
+      if not player.is_temporarily_blocked(ability_item):
+        if ability_item in BIAS_CONTROLLED_ABILITIES:
+          player.temporarily_block(ability_item)
+            
+        used_ability = get_used_ability(ability_item)
+    
+        if used_ability != None:
+          player.use_ability(used_ability)
 
-    if ability_item in ACTION_COSTS:
-      player.add_action(ability_item)
-      player.add_expense(ACTION_COSTS[ability_item])
-    else:
-      recordable = check_recordable_action(ability_item)
+        if ability_item in ACTION_COSTS:
+          player.add_action(ability_item)
+          player.add_expense(ACTION_COSTS[ability_item])
+        else:
+          recordable = check_recordable_action(ability_item)
       
-      if recordable != None:
-        player.add_action(recordable)
+          if recordable != None:
+            player.add_action(recordable)
 
-        if recordable == "revive hero (altar)":
-          player.reviving_hero()
-          player.add_expense(ALTAR_REVIVE_COST)
-        elif recordable == "revive hero (tavern)":
-          player.add_expense(TAVERN_REVIVE_COST)
+            if recordable == "revive hero (altar)":
+              player.reviving_hero()
+              player.add_expense(ALTAR_REVIVE_COST)
+            elif recordable == "revive hero (tavern)":
+              player.add_expense(TAVERN_REVIVE_COST)
 
-    if trained_ability != None:
-      player.get_hero_by_name(trained_ability[0]).train_ability(trained_ability[1])
-    elif ability_item in HERO_STRINGS:     # hero training
-      if not player.has_hero(ability_item) and len(player.state.heroes) < 3:    # training a new hero
-        player.cancel_untrained_heroes()
+        trained_ability = get_trained_ability_name(ability_item)
+
+        if trained_ability != None:
+          player.get_hero_by_name(trained_ability[0]).train_ability(trained_ability[1])
+        elif ability_item in HERO_STRINGS:     # hero training
+          if not player.has_hero(ability_item) and len(player.state.heroes) < 3:    # training a new hero
+            player.cancel_untrained_heroes()
         
-        new_hero = Hero()
-        new_hero.name = ability_item
+            new_hero = Hero()
+            new_hero.name = ability_item
         
-        if not ability_item in NEUTRAL_HERO_STRINGS:                            # neutral heroes trained instantly 
-          new_hero.revive_time_left = HERO_REVIVE_TIMES[0]
+            if not ability_item in NEUTRAL_HERO_STRINGS:                            # neutral heroes trained instantly 
+              new_hero.revive_time_left = HERO_REVIVE_TIMES[0]
         
-        player.state.heroes.append(new_hero)
+            player.state.heroes.append(new_hero)
         
-    if (player.state.tier == 1 and ability_item in TIER2_STRINGS) or (player.state.tier == 2 and ability_item in TIER3_STRINGS):
-      player.next_tier()
+        if (player.state.tier == 1 and ability_item in TIER2_STRINGS) or (player.state.tier == 2 and ability_item in TIER3_STRINGS):
+          player.next_tier()
+  except Exception as e:
+    print >>sys.stderr, "Encountered error: " + str(e) + ", but going on."

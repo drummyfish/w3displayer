@@ -491,7 +491,7 @@
             for (var i = 0; i < player.state.last_actions.length; i++)
               {
                 var action_li = make_element("li",action_ul,"");
-                action_li.innerHTML = player.state.last_actions[i];
+                action_li.innerHTML = shorten_string(player.state.last_actions[i],20);
               }
           }
             
