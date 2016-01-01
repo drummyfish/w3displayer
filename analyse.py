@@ -632,6 +632,77 @@ ACTION_COSTS = {       # gold, lumber, food
   w3g.ITEMS[b'dthb'] : (0,0,0),     # thunderbloom bulb
   }
 
+UNITS_UPGRADES = [                  # units and upgrades strings
+  w3g.ITEMS[b'hpea'],        # peasant
+  w3g.ITEMS[b'hfoo'],        # footman
+  w3g.ITEMS[b'hrif'],        # rifleman
+  w3g.ITEMS[b'hkni'],        # knight
+  w3g.ITEMS[b'hmpr'],        # priest
+  w3g.ITEMS[b'hsor'],        # sorceress
+  w3g.ITEMS[b'hspt'],        # spell breaker
+  w3g.ITEMS[b'hmtm'],        # mortar team
+  w3g.ITEMS[b'hmtt'],        # siege engine
+  w3g.ITEMS[b'hgry'],        # gryphon rider
+  w3g.ITEMS[b'nws1'],        # dragon hawk
+  w3g.ITEMS[b'hgyr'],        # flying machine
+  w3g.ITEMS[b'Rhaa'],        # artillery
+  w3g.ITEMS[b'Rhac'],        # masonry 
+  w3g.ITEMS[b'Rhan'],        # animal war training
+  w3g.ITEMS[b'Rhar'],        # plating 
+  w3g.ITEMS[b'Rhcd'],        # cloud
+  w3g.ITEMS[b'Rhde'],        # defend
+  w3g.ITEMS[b'Rhfc'],        # flak cannons
+  w3g.ITEMS[b'Rhfs'],        # fragmentation shards
+  w3g.ITEMS[b'Rhgb'],        # flying machine bombs
+  w3g.ITEMS[b'Rhhb'],        # storm hammers
+  w3g.ITEMS[b'Rhla'],        # leather armor
+  w3g.ITEMS[b'Rhlh'],        # lumber harvesting
+  w3g.ITEMS[b'Rhme'],        # melee weapons    
+  w3g.ITEMS[b'Rhmi'],        # gold
+  w3g.ITEMS[b'Rhpt'],        # priest training        
+  w3g.ITEMS[b'Rhra'],        # ranged weapons         
+  w3g.ITEMS[b'Rhri'],        # long rifles
+  w3g.ITEMS[b'Rhrt'],        # barrage
+  w3g.ITEMS[b'Rhse'],        # magic sentry
+  w3g.ITEMS[b'Rhsr'],        # flare
+  w3g.ITEMS[b'Rhss'],        # control magic
+  w3g.ITEMS[b'Rhst'],        # sorceress training 
+  w3g.ITEMS[b'opeo'],        # peon
+  w3g.ITEMS[b'ogru'],        # grunt
+  w3g.ITEMS[b'ohun'],        # troll headhunter
+  w3g.ITEMS[b'otbk'],        # troll berserker
+  w3g.ITEMS[b'oshm'],        # shaman
+  w3g.ITEMS[b'odoc'],        # witch doctor
+  w3g.ITEMS[b'ospw'],        # spirit walker
+  w3g.ITEMS[b'orai'],        # raider
+  w3g.ITEMS[b'okod'],        # kodo beast
+  w3g.ITEMS[b'ocat'],        # demolisher
+  w3g.ITEMS[b'otbr'],        # troll batrider
+  w3g.ITEMS[b'owyv'],        # wind rider
+  w3g.ITEMS[b'otau'],        # tauren
+  w3g.ITEMS[b'Roaa'],        # orc artillery
+  w3g.ITEMS[b'Roar'],        # unit armor 
+  w3g.ITEMS[b'Robf'],        # burning oil
+  w3g.ITEMS[b'Robk'],        # berserker
+  w3g.ITEMS[b'Robs'],        # berserker strength
+  w3g.ITEMS[b'Roch'],        # chaos
+  w3g.ITEMS[b'Roen'],        # ensnare
+  w3g.ITEMS[b'Rolf'],        # liquid fire
+  w3g.ITEMS[b'Rwdm'],        # war drums
+  w3g.ITEMS[b'Rome'],        # melee weapons         
+  w3g.ITEMS[b'Ropg'],        # pillage
+  w3g.ITEMS[b'Rora'],        # ranged weapons        
+  w3g.ITEMS[b'Rorb'],        # reinforced defenses
+  w3g.ITEMS[b'Rosp'],        # spiked barricades     
+  w3g.ITEMS[b'Rost'],        # shaman training       
+  w3g.ITEMS[b'Rotr'],        # troll regeneration
+  w3g.ITEMS[b'Rovs'],        # envenomed spears
+  w3g.ITEMS[b'Rowd'],        # witch doctor training 
+  w3g.ITEMS[b'Rows'],        # pulverize
+  w3g.ITEMS[b'Rowt']         # spirit walker training  
+  #TODO
+  ]
+
 BIAS_CONTROLLED_ABILITIES = [       # abilities stat are being checked agains BIAS_TIMER
   w3g.ITEMS[b'\x3B\x00\x0D\x00'],
   w3g.ITEMS[b'\x3C\x00\x0D\x00'],
@@ -704,7 +775,8 @@ class PlayerState:
     self.tier_time_left = -1        # how long till next tier
     self._reviving_hero_timer = -1  # used to count time for unknown dead hero revival
     self._time_since_hero_revival = 0
-    self._temporarily_blocked_abilities = []  # will hold [action_name, block_time_left] elements
+    self._temporarily_blocked_abilities = []  # will hold [action_name, block_time_left] items
+    self.units_upgrades = {}                  # unit_or_upgrade : count
 
 class Player:
   def __init__(self):
@@ -725,6 +797,12 @@ class Player:
   def add_action(self,action_string):
     self.state.last_actions.pop()
     self.state.last_actions = [action_string] + self.state.last_actions
+  
+  def add_unit_upgrade(self, unit_upgrade_string):
+    if not unit_upgrade_string in self.state.units_upgrades:
+      self.state.units_upgrades[unit_upgrade_string] = 1
+    else:
+      self.state.units_upgrades[unit_upgrade_string] += 1
   
   def temporarily_block(self, ability_name):  # all actions with 'ability_name' name will be ignored in next BIAS_TIMER to prevent multiple click events
     self.state._temporarily_blocked_abilities.append([ability_name,BIAS_TIMER])
@@ -1005,6 +1083,9 @@ for event in replay_file.events:
     elif type(event) is w3g.Ability or type(event) is w3g.AbilityPosition or type(event) is w3g.AbilityPositionObject:
       player = players[event.player_id]
       ability_item = w3g.ITEMS.get(event.ability,event.ability)
+    
+      if ability_item in UNITS_UPGRADES:
+        player.add_unit_upgrade(ability_item)
     
       if not player.is_temporarily_blocked(ability_item):
         if ability_item in BIAS_CONTROLLED_ABILITIES:
